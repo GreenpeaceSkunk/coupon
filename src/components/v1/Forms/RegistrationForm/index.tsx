@@ -1,11 +1,7 @@
 import React, { FormEvent, memo, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { generatePath, useNavigate } from 'react-router-dom';
 import { FormContext } from '../../../Forms/context';
-<<<<<<< HEAD
 import { IdentificationType, OnChangeEvent, OnClickEvent, CityType, ProvinceType } from 'greenpeace';
-=======
-import { IdentificationType, OnChangeEvent, OnClickEvent } from 'greenpeace';
->>>>>>> 7573f42 (Rebase against master)
 import {
   validateEmail,
   validateNewAmount,
@@ -41,7 +37,6 @@ const Component: React.FunctionComponent<{}> = memo(() => {
   const navigate = useNavigate();
   const { searchParams, urlSearchParams } = useQuery();
   const snackbarRef = useRef<ISnackbarRef>(null);
-  const [identificationType, setIdentificationType] = useState<IdentificationType | null>();
   
   const onChangeHandler = useCallback((evt: OnChangeEvent) => {
     const name = evt.currentTarget.name;
