@@ -1,7 +1,11 @@
 import React, { FormEvent, memo, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { generatePath, useNavigate } from 'react-router-dom';
 import { FormContext } from '../../../Forms/context';
+<<<<<<< HEAD
 import { IdentificationType, OnChangeEvent, OnClickEvent, CityType, ProvinceType } from 'greenpeace';
+=======
+import { IdentificationType, OnChangeEvent, OnClickEvent } from 'greenpeace';
+>>>>>>> 7573f42 (Rebase against master)
 import {
   validateEmail,
   validateNewAmount,
@@ -37,6 +41,7 @@ const Component: React.FunctionComponent<{}> = memo(() => {
   const navigate = useNavigate();
   const { searchParams, urlSearchParams } = useQuery();
   const snackbarRef = useRef<ISnackbarRef>(null);
+  const [identificationType, setIdentificationType] = useState<IdentificationType | null>();
   
   const onChangeHandler = useCallback((evt: OnChangeEvent) => {
     const name = evt.currentTarget.name;
@@ -378,6 +383,123 @@ const Component: React.FunctionComponent<{}> = memo(() => {
             </Form.Group>
           </Form.Column>
         </Form.Row>
+
+        {(appData.settings.general.form_fields.registration && appData.settings.general.form_fields.registration.is_card_holder.show) && (
+          <>
+            <Form.Row>
+              <Form.Column>
+                <Form.Group
+                  value={payment.isCardHolder}
+                  fieldName='isCardHolder'
+                  labelText={``}
+                  showErrorMessage={showFieldErrors}
+                  displayAs='grid'
+                  gridColumns={1}
+                  validateFn={validateEmptyField}
+                  onUpdateHandler={onUpdateFieldHandler}
+                  customCss={css`
+                    > label {
+                      font-weight: bold;
+                    }
+                  `}
+                >
+                  <Form.RadioButton
+                    name='isCardHolder'
+                    text='No soy el titular de la tarjeta con la que voy a realizar la donación.'
+                    value={+payment.isCardHolder}
+                    checkedValue={(+payment.isCardHolder) | 1}
+                    onChangeHandler={onChangeHandler}
+                    onClickHandler={(evt: OnClickEvent) => {
+                      evt.currentTarget.name = evt.currentTarget.name;
+                      evt.currentTarget.value = +payment.isCardHolder === 1 ? 0 : 1;
+                      onChangeHandler(evt as OnChangeEvent)
+                    }}
+                    customCss={css``}
+                    dataSchema='payment'
+                  />
+                </Form.Group>
+              </Form.Column>
+
+              {((+payment.isCardHolder) ? true : false) && (
+                <>
+                  <Form.Column>
+                    <Form.Group
+                      fieldName='cardholderName'
+                      value={payment.cardholderName}
+                      labelText='Titular de la tarjeta (tal cual figura en la tarjeta)'
+                      showErrorMessage={showFieldErrors}
+                      validateFn={validateEmptyField}
+                      onUpdateHandler={onUpdateFieldHandler}
+                    >
+                      <Elements.Input
+                        name='cardholderName'
+                        type='text'
+                        placeholder=''
+                        value={payment.cardholderName}
+                        onChange={onChangeHandler}
+                        data-schema='payment'
+                      />
+                    </Form.Group>
+                  </Form.Column>
+                  <Form.Column>
+                    <Form.Group
+                      fieldName='docType'
+                      value={payment.docType}
+                      labelText='Tipo de documento'
+                      showErrorMessage={showFieldErrors}
+                      validateFn={validateEmptyField}
+                      onUpdateHandler={onUpdateFieldHandler}
+                    >
+                      <Elements.Select
+                        id="docType"
+                        name="docType"
+                        data-checkout="docType"
+                        value={payment.docType}
+                        onChange={onChangeHandler}
+                        data-schema='payment'
+                      >
+                        <option value=""></option>
+                        {(appData.settings.general.form_fields.shared.identification_types.values || []).map((doc: IdentificationType) => (
+                          <option key={doc.type} value={doc.type}>{doc.value}</option>
+                        ))}
+                      </Elements.Select>
+                    </Form.Group>
+                    <Form.Group
+                      fieldName='docNumber'
+                      value={payment.docNumber}
+                      labelText='Número de documento'
+                      showErrorMessage={showFieldErrors}
+                      onUpdateHandler={onUpdateFieldHandler}
+                      validateFn={() => {
+                        if(identificationType) {
+                          return {
+                            isValid: new RegExp(identificationType.validator.expression).test(payment.docNumber),
+                            errorMessage: ERROR_CODES["324"],
+                          }
+                        }
+                        return {
+                          isValid: false,
+                          errorMessage: ERROR_CODES["324"],
+                        }
+                      }}
+                    >
+                      <Elements.Input
+                        type='text'
+                        id='docNumber'
+                        name='docNumber'
+                        placeholder={identificationType?.placeholder || ''}
+                        data-checkout='docNumber'
+                        value={payment.docNumber}
+                        onChange={onChangeHandler}
+                        data-schema='payment'
+                      />
+                    </Form.Group>
+                  </Form.Column>
+                </>
+              )}
+            </Form.Row>
+          </>
+        )}
         <Form.Row>
           <Form.Column>
             <Form.Group
@@ -618,6 +740,27 @@ const Component: React.FunctionComponent<{}> = memo(() => {
                   data-schema='user'
                 />
               </Form.Group>
+              <Form.Group
+                value={user.addressNumber}
+                fieldName='addressNumber'
+                labelText='Número'
+                showErrorMessage={showFieldErrors}
+                validateFn={validateEmptyField}
+                onUpdateHandler={onUpdateFieldHandler}
+                isRequired={false}
+                customCss={css`
+                flex-shrink: 2;
+              `}
+              >
+                <Elements.Input
+                  name='addressNumber'
+                  type='addressNumber'
+                  placeholder=''
+                  value={user.addressNumber}
+                  onChange={onChangeHandler}
+                  data-schema='user'
+                />
+              </Form.Group>
               {(appData.settings.general.form_fields.registration.location.addressNumber?.show) && (
                 <Form.Group
                   fieldName='addressNumber'
@@ -651,7 +794,7 @@ const Component: React.FunctionComponent<{}> = memo(() => {
                   onUpdateHandler={onUpdateFieldHandler}
                   isRequired={appData.settings.general.form_fields.registration.location.zipCode.required || false}
                   customCss={css`
-                    width: 40%;
+                    flex-shrink: 2;
                   `}
                 >
                   <Elements.Input
@@ -687,8 +830,8 @@ const Component: React.FunctionComponent<{}> = memo(() => {
       </Form.Nav>
     </Form.Main>
   ), [
-    user,
     payment,
+    user,
     submitting,
     countries,
     provinces,
@@ -697,6 +840,7 @@ const Component: React.FunctionComponent<{}> = memo(() => {
     snackbarRef,
     showFieldErrors,
     appData,
+    identificationType,
     onSubmitHandler,
     onChangeHandler,
     onUpdateFieldHandler,
