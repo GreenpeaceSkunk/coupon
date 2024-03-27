@@ -730,27 +730,6 @@ const Component: React.FunctionComponent<{}> = memo(() => {
                   data-schema='user'
                 />
               </Form.Group>
-              <Form.Group
-                value={user.addressNumber}
-                fieldName='addressNumber'
-                labelText='Número'
-                showErrorMessage={showFieldErrors}
-                validateFn={validateEmptyField}
-                onUpdateHandler={onUpdateFieldHandler}
-                isRequired={false}
-                customCss={css`
-                flex-shrink: 2;
-              `}
-              >
-                <Elements.Input
-                  name='addressNumber'
-                  type='addressNumber'
-                  placeholder=''
-                  value={user.addressNumber}
-                  onChange={onChangeHandler}
-                  data-schema='user'
-                />
-              </Form.Group>
               {(appData.settings.general.form_fields.registration.location.addressNumber?.show) && (
                 <Form.Group
                   fieldName='addressNumber'
@@ -784,7 +763,7 @@ const Component: React.FunctionComponent<{}> = memo(() => {
                   onUpdateHandler={onUpdateFieldHandler}
                   isRequired={appData.settings.general.form_fields.registration.location.zipCode.required || false}
                   customCss={css`
-                    flex-shrink: 2;
+                    width: 40%;
                   `}
                 >
                   <Elements.Input

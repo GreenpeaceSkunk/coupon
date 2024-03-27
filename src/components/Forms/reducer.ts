@@ -120,12 +120,8 @@ export const initialState: ContextStateType = {
         cardHolderName: 'APRO',
         // cardExpirationMonth: '11',
         // cardExpirationYear: '2025',
-<<<<<<< HEAD
         docType: 'CC',
         docNumber: '102345678',
-=======
-        docNumber: '0123456789',
->>>>>>> f4bf1c6 (Rebase against master)
         cardExpiration: '11/27',
         bankName: 'bank_2',
         bankAccountType: 'AHORROS',
