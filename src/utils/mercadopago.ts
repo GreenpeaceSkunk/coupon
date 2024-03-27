@@ -29,6 +29,7 @@ export const ERROR_CODES: {[key: string]: string} = {
   '324': 'El documento es inválido.',
   '325': 'El mes es inválido.',
   '326': 'El año es inválido.',
+  '327': 'Código de area inválido.',
   'default': 'Revisa los datos.',
 };
 

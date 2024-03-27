@@ -292,7 +292,8 @@ const Group: React.FunctionComponent<{
   isRequired?: boolean;
   displayAs?: 'grid' | 'flex' | 'block';
   gridColumns?: number;
-  validateFn?: (value: any, maxLength?: number) => ValidationType;
+  // validateFn?: (value: any, maxLength?: number) => ValidationType;
+  validateFn?: (...args: any[]) => ValidationType;
   onUpdateHandler?: (fieldName: string, isValid: boolean, value?: string|number|boolean) => void;
 }> = ({
   children,
@@ -329,6 +330,8 @@ const Group: React.FunctionComponent<{
           onUpdateHandler(fieldName, validator.isValid, value);
         }
       }
+    } else {
+      setIsValid(true);
     }
   }, [
     maxLength,

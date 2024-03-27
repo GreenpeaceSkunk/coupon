@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-const ERROR_CODES = {
+export const ERROR_CODES = {
   'SK001': 'Asegurate que el nombre sea correcto.',
   'SK002': 'El nombre solo puede contener letras.',
   'SK003': 'Asegurate que el apellido sea correcto.',
@@ -18,6 +18,10 @@ const ERROR_CODES = {
   'SK015': 'Revisa el código de seguridad',
   'SK016': 'Error en el Email',
   'MP316': 'Ingresa un nombre válido.',
+  '001': 'Valor incorrecto',
+  '002': 'Código de area incorrecto',
+  '003': 'Teléfono incorrecto',
+  '324': 'El documento es inválido.',
 }
 
 export type ValidationType = { isValid: boolean; errorMessage?: string };
@@ -346,4 +350,18 @@ export const validateNewAmount = (value: string, minValue = 300): ValidationType
       errorMessage: '',
     };
   }
+}
+
+export const validateCustomRegExp = (regExp: string, value = '', errorMessage = ERROR_CODES['001']): ValidationType => {
+  if(new RegExp(regExp).test(value)) {
+    return {
+      isValid: true,
+      errorMessage: '',
+    }
+  }
+
+  return {
+    isValid: false,
+    errorMessage,
+  };
 }

@@ -5,10 +5,9 @@ import { IdentificationType, OnChangeEvent } from 'greenpeace';
 import {
   validateEmail,
   validateNewAmount,
-  validatePhoneNumber,
-  validateAreaCode,
   validateEmptyField,
   validateFirstName,
+  validateCustomRegExp,
 } from '../../../../utils/validators';
 import { css } from 'styled-components';
 import Shared from '../../../Shared';
@@ -24,7 +23,7 @@ import { AppContext } from '../../../App/context';
 import { pixelToRem } from 'meema.utils';
 import { ProvinceType } from '../../../Forms/reducer';
 import moment from 'moment';
-import { ERROR_CODES } from '../../../../utils/mercadopago';
+import { ERROR_CODES } from '../../../../utils/validators';
 
 const Component: React.FunctionComponent<{}> = memo(() => {
   const { appData } = useContext(AppContext);
@@ -439,14 +438,14 @@ const Component: React.FunctionComponent<{}> = memo(() => {
           </Form.Column>
         </Form.Row>
         <Form.Row>
-          <Form.Column bottomText='Escribe solo números y no agregues guiones.'>
+          <Form.Column>
             <Form.Group
               fieldName='areaCode'
               value={user.areaCode}
               labelText='Cód. área'
               showErrorMessage={showFieldErrors}
-              validateFn={validateAreaCode}
               onUpdateHandler={onUpdateFieldHandler}
+              validateFn={() => validateCustomRegExp(appData.settings.general.form_fields.registration.area_code.validator.expression, user.areaCode, ERROR_CODES['002'])}
               customCss={css`
                 width: 40%;
               `}
@@ -466,13 +465,14 @@ const Component: React.FunctionComponent<{}> = memo(() => {
               value={user.phoneNumber}
               labelText='Número telefónico'
               showErrorMessage={showFieldErrors}
-              validateFn={validatePhoneNumber}
+              validateFn={() => validateCustomRegExp(appData.settings.general.form_fields.registration.phone_number.validator.expression, user.phoneNumber, ERROR_CODES['003'])}
               onUpdateHandler={onUpdateFieldHandler}
+              labelBottomText={appData.settings.general.form_fields.registration.phone_number.helpText ? appData.settings.general.form_fields.registration.phone_number.helpText : 'Escribir solo números'}
             >
               <Elements.Input
                 name='phoneNumber'
                 type='text'
-                placeholder={appData.settings.general.form_fields.registration.phone_mobile_number?.placeholder || ''}
+                placeholder={appData.settings.general.form_fields.registration.phone_number?.placeholder || ''}
                 value={user.phoneNumber}
                 onChange={onChangeHandler}
                 data-schema='user'
@@ -598,7 +598,7 @@ const Component: React.FunctionComponent<{}> = memo(() => {
                 fieldName='address'
                 labelText='Dirección'
                 showErrorMessage={showFieldErrors}
-                validateFn={validateEmptyField}
+                validateFn={() => validateCustomRegExp('^[a-zA-Z\. ]*$', user.address, ERROR_CODES['001'])}
                 onUpdateHandler={onUpdateFieldHandler}
                 isRequired={appData.settings.general.form_fields.registration.location.address.required || false}
               >
@@ -617,21 +617,21 @@ const Component: React.FunctionComponent<{}> = memo(() => {
                   value={user.addressNumber}
                   labelText='Número'
                   showErrorMessage={showFieldErrors}
-                  validateFn={validateEmptyField}
+                  validateFn={() => validateCustomRegExp('^[0-9]{1,8}$', user.addressNumber, ERROR_CODES['001'])}
                   onUpdateHandler={onUpdateFieldHandler}
                   isRequired={appData.settings.general.form_fields.registration.location.addressNumber.required || false}
                   customCss={css`
                     width: 40%;
-                  `}
+                    `}
                 >
                   <Elements.Input
                     name='addressNumber'
-                    type='number'
+                    type='text'
                     placeholder=''
                     value={user.addressNumber}
                     onChange={onChangeHandler}
                     data-schema='user'
-                  />
+                    />
                 </Form.Group>
               )}
               {(appData.settings.general.form_fields.registration.location.address.show && appData.settings.general.form_fields.registration.location.zipCode?.show) && (
@@ -640,29 +640,7 @@ const Component: React.FunctionComponent<{}> = memo(() => {
                   value={user.zipCode}
                   labelText='Cód. postal'
                   showErrorMessage={showFieldErrors}
-                  validateFn={validateEmptyField}
-                  onUpdateHandler={onUpdateFieldHandler}
-                  isRequired={appData.settings.general.form_fields.registration.location.addressNumber.required || false}
-                  customCss={css`
-                    width: 40%;
-                  `}
-                >
-                  <Elements.Input
-                    name='addressNumber'
-                    type='number'
-                    placeholder=''
-                    value={user.addressNumber}
-                    onChange={onChangeHandler}
-                  />
-                </Form.Group>
-              )}
-              {(appData.settings.general.form_fields.registration.location.address.show && appData.settings.general.form_fields.registration.location.zipCode?.show) && (
-                <Form.Group
-                  fieldName='zipCode'
-                  value={user.zipCode}
-                  labelText='Cód. postal'
-                  showErrorMessage={showFieldErrors}
-                  validateFn={validateEmptyField}
+                  validateFn={() => validateCustomRegExp('^[a-zA-Z0-9]*$', user.zipCode, ERROR_CODES['001'])}
                   onUpdateHandler={onUpdateFieldHandler}
                   isRequired={appData.settings.general.form_fields.registration.location.zipCode.required || false}
                   customCss={css`
@@ -674,7 +652,6 @@ const Component: React.FunctionComponent<{}> = memo(() => {
                     type='text'
                     placeholder=''
                     value={user.zipCode}
-                    maxLength={10}
                     onChange={onChangeHandler}
                     data-schema='user'
                   />
