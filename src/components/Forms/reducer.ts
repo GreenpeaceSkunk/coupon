@@ -1,18 +1,11 @@
-import { SharedState, SharedActions, GenericReducerFn, IData, IUserData, IPaymentData } from 'greenpeace';
-
-export type FieldErrorType = { [fieldName: string]:boolean } | null;
-export type ErrorsType = { [index: string]: FieldErrorType } | null;
-
-type FieldType = { [x: string]: string | number };
-export type ProvinceType = {name: string; slug: string; code: string; cities: Array<string>;};
+import { SharedState, SharedActions, GenericReducerFn, IData, IUserData, IPaymentData, RegionType, ProvinceType, CityType, FieldType, FieldErrorType } from 'greenpeace';
 
 export type FormSharedType = {
   countries?: Array<{code: string; label: string; phone: string}>; // { code: "AD", label: "Andorra", phone: "376" } 
+  regions?: Array<RegionType>;
   provinces?: Array<ProvinceType>;
-  cities?: Array<string>;
+  cities?: Array<CityType>;
 }
-
-const autofill = process.env.REACT_APP_AUTOFILL_VALUES ? (process.env.REACT_APP_AUTOFILL_VALUES === 'true') ? true : false : false;
 
 export type ContextStateType = {
   data: {
@@ -33,10 +26,12 @@ export type ContextActionType =
 | { type: 'UPDATE_USER_DATA', payload: FieldType }
 | { type: 'UPDATE_PAYMENT_DATA', payload: FieldType }
 | { type: 'UPDATE_FORM_STATUS' }
-| { type: 'SET_FORM_FIELDS_SETTINGS', payload: FormSharedType }
+| { type: 'SET_SHARED_FORM_FIELDS', payload: FormSharedType }
 | { type: 'SET_ERROR', error: string | null }
 | { type: 'RESET' }
 | SharedActions;
+
+const autofill = process.env.REACT_APP_AUTOFILL_VALUES ? (process.env.REACT_APP_AUTOFILL_VALUES === 'true') ? true : false : false;
 
 const defaultData = {
   user: {
@@ -136,6 +131,7 @@ export const initialState: ContextStateType = {
   } as IData,
   shared: {
     cities: [],
+    regions: [],
     countries: [],
     provinces: [],
   },
@@ -209,7 +205,7 @@ export const reducer: GenericReducerFn<ContextStateType, ContextActionType> = (s
         errors: tmpErrors,
         allowNext: Object.values(tmpErrors).length ? false : true,
       }
-    case 'SET_FORM_FIELDS_SETTINGS': {
+    case 'SET_SHARED_FORM_FIELDS': {
       return {
         ...state,
         shared: {

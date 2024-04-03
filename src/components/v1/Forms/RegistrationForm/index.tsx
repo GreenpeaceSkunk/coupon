@@ -1,7 +1,7 @@
 import React, { FormEvent, memo, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { generatePath, useNavigate } from 'react-router-dom';
 import { FormContext } from '../../../Forms/context';
-import { IdentificationType, OnChangeEvent } from 'greenpeace';
+import { IdentificationType, OnChangeEvent, OnClickEvent, CityType, ProvinceType } from 'greenpeace';
 import {
   validateEmail,
   validateNewAmount,
@@ -21,7 +21,6 @@ import Snackbar, { IRef as ISnackbarRef } from '../../../Snackbar';
 import { createContact } from '../../../../services/greenlab';
 import { AppContext } from '../../../App/context';
 import { pixelToRem } from 'meema.utils';
-import { ProvinceType } from '../../../Forms/reducer';
 import moment from 'moment';
 import { ERROR_CODES } from '../../../../utils/validators';
 
@@ -480,59 +479,58 @@ const Component: React.FunctionComponent<{}> = memo(() => {
             </Form.Group>
           </Form.Column>
         </Form.Row>
-
-          <Form.Row>
-            <Form.Column>
-              {(appData.settings.general.form_fields.registration.genre?.show) && (
-                <Form.Group
-                  fieldName='genre'
+        <Form.Row>
+          <Form.Column>
+            {(appData.settings.general.form_fields.registration.genre?.show) && (
+              <Form.Group
+                fieldName='genre'
+                value={user.genre}
+                labelText='Género'
+                showErrorMessage={showFieldErrors}
+                validateFn={validateEmptyField}
+                onUpdateHandler={onUpdateFieldHandler}
+              >
+                <Elements.Select
+                  id="genre"
+                  name="genre"
+                  data-checkout="genre"
                   value={user.genre}
-                  labelText='Género'
-                  showErrorMessage={showFieldErrors}
-                  validateFn={validateEmptyField}
-                  onUpdateHandler={onUpdateFieldHandler}
+                  onChange={onChangeHandler}
                 >
-                  <Elements.Select
-                    id="genre"
-                    name="genre"
-                    data-checkout="genre"
-                    value={user.genre}
-                    onChange={onChangeHandler}
-                  >
-                    <option value=""></option>
-                    {['Femenino', 'Masculino', 'No binario'].map((value: string, key: number) => (
-                      <option key={key} value={value}>{value}</option>
-                    ))}
-                  </Elements.Select>
-                </Form.Group>
-              )}
-              {(appData.settings.general.form_fields.registration.location.country?.show) && (
-                <Form.Group
-                  fieldName='country'
+                  <option value=""></option>
+                  {['Femenino', 'Masculino', 'No binario'].map((value: string, key: number) => (
+                    <option key={key} value={value}>{value}</option>
+                  ))}
+                </Elements.Select>
+              </Form.Group>
+            )}
+            {(appData.settings.general.form_fields.registration.location.country?.show) && (
+              <Form.Group
+                fieldName='country'
+                value={user.country}
+                labelText='País'
+                showErrorMessage={showFieldErrors}
+                validateFn={validateEmptyField}
+                onUpdateHandler={onUpdateFieldHandler}
+              >
+                <Elements.Select
+                  id="country"
+                  name="country"
+                  data-checkout="country"
                   value={user.country}
-                  labelText='País'
-                  showErrorMessage={showFieldErrors}
-                  validateFn={validateEmptyField}
-                  onUpdateHandler={onUpdateFieldHandler}
+                  onChange={onChangeHandler}
+                  // disabled={appData.settings.general.form_fields.registration.location.country.disabled}
+                  data-schema='user'
                 >
-                  <Elements.Select
-                    id="country"
-                    name="country"
-                    data-checkout="country"
-                    value={user.country}
-                    onChange={onChangeHandler}
-                    // disabled={appData.settings.general.form_fields.registration.location.country.disabled}
-                    data-schema='user'
-                  >
-                    <option value=""></option>
-                    {(countries || []).map((value: any, key: number) => (
-                      <option key={key} value={value.label}>{value.label}</option>
-                    ))}
-                  </Elements.Select>
-                </Form.Group>
-              )}
-            </Form.Column>
-          </Form.Row>
+                  <option value=""></option>
+                  {(countries || []).map((value: any, key: number) => (
+                    <option key={key} value={value.label}>{value.label}</option>
+                  ))}
+                </Elements.Select>
+              </Form.Group>
+            )}
+          </Form.Column>
+        </Form.Row>
 
         {(appData.settings.general.form_fields.registration.location.province?.show) && (
           <Form.Row>
@@ -555,8 +553,8 @@ const Component: React.FunctionComponent<{}> = memo(() => {
                   data-schema='user'
                 >
                   <option value=""></option>
-                  {(provinces || []).map((value: ProvinceType) => (
-                    <option key={value.slug} value={value.name}>{value.name}</option>
+                  {(provinces || []).map((province: ProvinceType) => (
+                    <option key={province.code} value={province.code}>{province.name}</option>
                   ))}
                 </Elements.Select>
               </Form.Group>
@@ -580,8 +578,8 @@ const Component: React.FunctionComponent<{}> = memo(() => {
                   data-schema='user'
                 >
                   <option value=""></option>
-                  {(cities || []).map((value: string, key: number) => (
-                    <option key={key} value={value}>{value}</option>
+                  {(cities || []).map((city: CityType) => (
+                    <option key={city.code} value={city.code}>{city.name}</option>
                   ))}
                 </Elements.Select>
               </Form.Group>

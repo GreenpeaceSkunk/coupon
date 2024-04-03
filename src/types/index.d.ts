@@ -73,6 +73,13 @@ export type ServiceParams = {
   public_key?: string;
 }
 
+export type FieldType = { [x: string]: string | number };
+export type FieldErrorType = { [fieldName: string]:boolean } | null;
+export type ErrorsType = { [index: string]: FieldErrorType } | null;
+export type CityType = { name: string; code: string; };
+export type ProvinceType = { name: string; code: string; cities: Array<CityType>; };
+export type RegionType = { code: string; name: string; provinces: Array<ProvinceType>; };
+
 export interface IUserData {
   firstName: string;
   lastName: string;
