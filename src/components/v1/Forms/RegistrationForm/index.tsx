@@ -596,7 +596,15 @@ const Component: React.FunctionComponent<{}> = memo(() => {
                 fieldName='address'
                 labelText='Dirección'
                 showErrorMessage={showFieldErrors}
-                validateFn={() => validateCustomRegExp('^[a-zA-Z\. ]*$', user.address, ERROR_CODES['001'])}
+                validateFn={
+                  () => validateCustomRegExp(
+                    typeof appData.settings.general.form_fields.registration.location.address.validator?.expression !== 'undefined'
+                      ? appData.settings.general.form_fields.registration.location.address.validator.expression
+                      : '^[a-zA-Z\. ]*$',
+                    user.address,
+                    ERROR_CODES['001']
+                  )
+                }
                 onUpdateHandler={onUpdateFieldHandler}
                 isRequired={appData.settings.general.form_fields.registration.location.address.required || false}
               >
