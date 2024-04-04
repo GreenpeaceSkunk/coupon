@@ -76,7 +76,7 @@ const CheckoutForm: React.FunctionComponent<{}> = () => {
           utm_content: urlSearchParams.get('utm_content') || 'undefined',
           utm_term: urlSearchParams.get('utm_term') || 'undefined',
           ciudad: user.city,
-          departamento: shared.provinces?.find((province: any) => province.name === user.province)?.code,
+          departamento: user.province,
           tipo_documento_cliente: user.docType,
           numero_documento_cliente: user.docNumber,
           ...(payment.paymentType === 'bank_account') ? {
