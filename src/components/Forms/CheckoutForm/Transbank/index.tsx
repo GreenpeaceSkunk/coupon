@@ -22,13 +22,7 @@ const Component: React.FunctionComponent<{}> = () => {
   const { appData } = useContext(AppContext);
   const [token, setToken] = useState<string>();
   const navigate = useNavigate();
-  const {
-    payment,
-    user,
-    params,
-    dispatch,
-  } = useContext(CheckoutFormContext);
-
+  const {payment, user, params, dispatch } = useContext(CheckoutFormContext);
   const {error} = useContext(FormContext);
 
   useEffect(() => {
@@ -43,7 +37,7 @@ const Component: React.FunctionComponent<{}> = () => {
           telefono: user.phoneNumber,
           fechaNacimiento: moment(user.birthDate, 'DD/MM/YYYY').format('YYYY-MM-DD'),
           pais: user.country,
-          region: user.province,
+          region: user.region,
           provincia: user.province,
           comuna: user.city,
           calle: user.address,
