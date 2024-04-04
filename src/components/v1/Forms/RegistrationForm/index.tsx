@@ -440,11 +440,11 @@ const Component: React.FunctionComponent<{}> = memo(() => {
           <Form.Column>
             <Form.Group
               fieldName='areaCode'
-              value={user.areaCode}
+              value={appData.settings.general.form_fields.registration.area_code?.default || user.areaCode}
               labelText='Cód. área'
               showErrorMessage={showFieldErrors}
               onUpdateHandler={onUpdateFieldHandler}
-              validateFn={() => validateCustomRegExp(appData.settings.general.form_fields.registration.area_code.validator.expression, user.areaCode, ERROR_CODES['002'])}
+              validateFn={() => validateCustomRegExp(appData.settings.general.form_fields.registration.area_code.validator?.expression, user.areaCode, ERROR_CODES['002'])}
               customCss={css`
                 width: 40%;
               `}
@@ -453,26 +453,27 @@ const Component: React.FunctionComponent<{}> = memo(() => {
                 name='areaCode'
                 type='text'
                 placeholder=''
-                value={user.areaCode}
+                defaultValue={appData.settings.general.form_fields.registration.area_code?.default || user.areaCode}
                 maxLength={4}
                 onChange={onChangeHandler}
+                disabled={appData.settings.general.form_fields.registration.area_code.disabled || false}
                 data-schema='user'
               />
             </Form.Group>
             <Form.Group
               fieldName='phoneNumber'
-              value={user.phoneNumber}
+              value={appData.settings.general.form_fields.registration.phone_number?.default || user.phoneNumber}
               labelText='Número telefónico'
               showErrorMessage={showFieldErrors}
-              validateFn={() => validateCustomRegExp(appData.settings.general.form_fields.registration.phone_number.validator.expression, user.phoneNumber, ERROR_CODES['003'])}
+              validateFn={() => validateCustomRegExp(appData.settings.general.form_fields.registration.phone_number.validator?.expression, user.phoneNumber, ERROR_CODES['003'])}
               onUpdateHandler={onUpdateFieldHandler}
-              labelBottomText={appData.settings.general.form_fields.registration.phone_number.helpText ? appData.settings.general.form_fields.registration.phone_number.helpText : 'Escribir solo números'}
+              labelBottomText={appData.settings.general.form_fields.registration.phone_number.help_text ? appData.settings.general.form_fields.registration.phone_number.help_text : 'Escribir solo números'}
             >
               <Elements.Input
                 name='phoneNumber'
                 type='text'
                 placeholder={appData.settings.general.form_fields.registration.phone_number?.placeholder || ''}
-                value={user.phoneNumber}
+                defaultValue={appData.settings.general.form_fields.registration.phone_number?.default || user.phoneNumber}
                 onChange={onChangeHandler}
                 data-schema='user'
               />
@@ -519,7 +520,7 @@ const Component: React.FunctionComponent<{}> = memo(() => {
                   data-checkout="country"
                   value={user.country}
                   onChange={onChangeHandler}
-                  // disabled={appData.settings.general.form_fields.registration.location.country.disabled}
+                  disabled={appData.settings.general.form_fields.registration.location.country.disabled || false}
                   data-schema='user'
                 >
                   <option value=""></option>
