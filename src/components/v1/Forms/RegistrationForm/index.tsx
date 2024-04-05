@@ -24,6 +24,88 @@ import { pixelToRem } from 'meema.utils';
 import moment from 'moment';
 import { ERROR_CODES } from '../../../../utils/validators';
 
+const UserDocument: React.FunctionComponent<{
+  docType: string;
+  docNumber: string;
+  dataSchema: 'user' | 'payment';
+  disabled?: boolean;
+  onChangeHandler: (evt: OnChangeEvent) => void;
+  onUpdateFieldHandler: (fieldName: string, isValid: boolean, value: any) => void;
+}> = memo(
+  ({ docType, docNumber, dataSchema, disabled = false, onChangeHandler, onUpdateFieldHandler }) => {
+    const { appData } = useContext(AppContext);
+    const [identificationType, setIdentificationType] = useState<IdentificationType | null>();
+    const { data: { user } } = useContext(FormContext);
+
+    useEffect(() => {
+      setIdentificationType(
+        appData.settings.general.form_fields.shared.identification_types.values.find(
+          (d: {type: string, value: string}) => d.type === docType
+        )
+      );
+    }, [appData, docType]);
+
+    return (
+      <>
+        <Form.Group
+          fieldName='docType'
+          value={docType}
+          labelText='Tipo de documento'
+          showErrorMessage={true}
+          validateFn={validateEmptyField}
+          onUpdateHandler={onUpdateFieldHandler}
+        >
+          <Elements.Select
+            id="docType"
+            name="docType"
+            data-checkout="docType"
+            value={docType}
+            onChange={onChangeHandler}
+            data-schema={dataSchema}
+            disabled={disabled}
+          >
+            <option value=""></option>
+            {(appData.settings.general.form_fields.shared.identification_types.values || []).map((doc: IdentificationType) => (
+              <option key={doc.type} value={doc.type}>{doc.value}</option>
+            ))}
+          </Elements.Select>
+        </Form.Group>
+        <Form.Group
+          fieldName='docNumber'
+          value={user.docNumber}
+          labelText='Número de documento'
+          showErrorMessage={true}
+          onUpdateHandler={onUpdateFieldHandler}
+          validateFn={() => {
+            if(identificationType) {
+              return {
+                isValid: new RegExp(identificationType.validator.expression).test(docNumber),
+                errorMessage: ERROR_CODES["324"],
+              }
+            }
+            return {
+              isValid: false,
+              errorMessage: ERROR_CODES["324"],
+            }
+          }}
+        >
+          <Elements.Input
+            type='text'
+            id='docNumber'
+            name='docNumber'
+            placeholder={identificationType?.placeholder || ''}
+            data-checkout='docNumber'
+            value={docNumber}
+            onChange={onChangeHandler}
+            data-schema={dataSchema}
+            disabled={disabled}
+          />
+        </Form.Group>
+      </>
+    )
+  }
+);
+
 const Component: React.FunctionComponent<{}> = memo(() => {
   const { appData } = useContext(AppContext);
   const {
@@ -115,6 +197,7 @@ const Component: React.FunctionComponent<{}> = memo(() => {
       donationStatus: 'requested',
     });
 
+    console.log('Contact', contact);
     if(contact) {
       pushToDataLayer({ 'event' : 'petitionSignup' });
 
@@ -144,7 +227,8 @@ const Component: React.FunctionComponent<{}> = memo(() => {
     setIdentificationType(
       appData.settings.general.form_fields.shared.identification_types.values.find(
         (d: {type: string, value: string}) => d.type === user.docType
-      ));
+      )
+    );
   }, [appData, user.docType]);
 
   useEffect(() => {
@@ -324,60 +408,88 @@ const Component: React.FunctionComponent<{}> = memo(() => {
         </Form.Row>
         <Form.Row>
           <Form.Column>
-            <Form.Group
-              fieldName='docType'
-              value={user.docType}
-              labelText='Tipo de documento'
-              showErrorMessage={showFieldErrors}
-              validateFn={validateEmptyField}
-              onUpdateHandler={onUpdateFieldHandler}
-            >
-              <Elements.Select
-                id="docType"
-                name="docType"
-                data-checkout="docType"
-                value={user.docType}
-                onChange={onChangeHandler}
-                data-schema='user'
-              >
-                <option value=""></option>
-                {(appData.settings.general.form_fields.shared.identification_types.values || []).map((doc: IdentificationType) => (
-                  <option key={doc.type} value={doc.type}>{doc.value}</option>
-                ))}
-              </Elements.Select>
-            </Form.Group>
-            <Form.Group
-              fieldName='docNumber'
-              value={user.docNumber}
-              labelText='Número de documento'
-              showErrorMessage={showFieldErrors}
-              onUpdateHandler={onUpdateFieldHandler}
-              validateFn={() => {
-                if(identificationType) {
-                  return {
-                    isValid: new RegExp(identificationType.validator.expression).test(user.docNumber),
-                    errorMessage: ERROR_CODES["324"],
-                  }
-                }
-                return {
-                  isValid: false,
-                  errorMessage: ERROR_CODES["324"],
-                }
-              }}
-            >
-              <Elements.Input
-                type='text'
-                id='docNumber'
-                name='docNumber'
-                placeholder={identificationType?.placeholder || ''}
-                data-checkout='docNumber'
-                value={user.docNumber}
-                onChange={onChangeHandler}
-                data-schema='user'
-              />
-            </Form.Group>
+            <UserDocument
+              onChangeHandler={onChangeHandler}
+              onUpdateFieldHandler={onUpdateFieldHandler}
+              docType={user.docType}
+              docNumber={user.docNumber}
+              dataSchema='user'
+            />
           </Form.Column>
         </Form.Row>
+
+        {(appData.settings.general.form_fields.registration && appData.settings.general.form_fields.registration.is_card_holder.show) && (
+          <>
+            <Form.Row>
+              <Form.Column>
+                <Form.Group
+                  value={payment.isCardHolder}
+                  fieldName='isCardHolder'
+                  labelText={``}
+                  showErrorMessage={showFieldErrors}
+                  displayAs='grid'
+                  gridColumns={1}
+                  validateFn={validateEmptyField}
+                  onUpdateHandler={onUpdateFieldHandler}
+                  customCss={css`
+                    > label {
+                      font-weight: bold;
+                    }
+                  `}
+                >
+                  <Form.RadioButton
+                    name='isCardHolder'
+                    text='Soy el titular de la tarjeta con la que voy a realizar la donación.'
+                    value={+payment.isCardHolder}
+                    checkedValue={(+payment.isCardHolder) | 1}
+                    onChangeHandler={onChangeHandler}
+                    onClickHandler={(evt: OnClickEvent) => {
+                      evt.currentTarget.name = evt.currentTarget.name;
+                      evt.currentTarget.value = +payment.isCardHolder === 1 ? 0 : 1;
+                      onChangeHandler(evt as OnChangeEvent)
+                    }}
+                    dataSchema='payment'
+                  />
+                </Form.Group>
+              </Form.Column>
+
+              {!payment.isCardHolder && (
+                <>
+                  <Form.Column>
+                    <Form.Group
+                      fieldName='cardHolderName'
+                      value={payment.cardHolderName}
+                      labelText='Titular de la tarjeta (tal cual figura en la tarjeta)'
+                      showErrorMessage={showFieldErrors}
+                      validateFn={validateEmptyField}
+                      onUpdateHandler={onUpdateFieldHandler}
+                    >
+                      <Elements.Input
+                        name='cardHolderName'
+                        type='text'
+                        placeholder=''
+                        value={payment.isCardHolder ? `${user.firstName} ${user.lastName}` : payment.cardHolderName}
+                        onChange={onChangeHandler}
+                        data-schema='payment'
+                        disabled={payment.isCardHolder}
+                      />
+                    </Form.Group>
+                  </Form.Column>
+                  <Form.Column>
+                    <UserDocument
+                      onChangeHandler={onChangeHandler}
+                      onUpdateFieldHandler={onUpdateFieldHandler}
+                      docType={payment.isCardHolder ? user.docType : payment.docType}
+                      docNumber={payment.isCardHolder ? user.docNumber : payment.docNumber}
+                      dataSchema='payment'
+                      disabled={payment.isCardHolder}
+                    />
+                  </Form.Column>
+                </>
+              )}
+            </Form.Row>
+          </>
+        )}
         <Form.Row>
           <Form.Column>
             <Form.Group
@@ -687,8 +799,8 @@ const Component: React.FunctionComponent<{}> = memo(() => {
       </Form.Nav>
     </Form.Main>
   ), [
-    user,
     payment,
+    user,
     submitting,
     countries,
     provinces,
@@ -697,6 +809,7 @@ const Component: React.FunctionComponent<{}> = memo(() => {
     snackbarRef,
     showFieldErrors,
     appData,
+    identificationType,
     onSubmitHandler,
     onChangeHandler,
     onUpdateFieldHandler,

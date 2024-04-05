@@ -91,8 +91,10 @@ export const initialState: ContextStateType = {
         genre: 'No binario',
         phoneNumber: '44440000',
         areaCode: '11',
-        docNumber: '12345678',
+        docNumber: '9876543210',
         docType: 'DNI',
+        address: 'Av. Libertador',
+        addressNumber: '8734',
         citizenId: '',
         constituentId: '',
         referredAreaCode: '351',
@@ -141,7 +143,7 @@ export const initialState: ContextStateType = {
   allowNext: false,
   error: null,
   errors: null,
-}
+};
 
 export const reducer: GenericReducerFn<ContextStateType, ContextActionType> = (state: ContextStateType, action: ContextActionType) => {
   switch (action.type) {
@@ -171,6 +173,11 @@ export const reducer: GenericReducerFn<ContextStateType, ContextActionType> = (s
         },
       }
     case 'UPDATE_PAYMENT_DATA':
+      let isCardHolder =  state.data.payment.isCardHolder;
+      if(action.payload['isCardHolder']) {
+        isCardHolder = action.payload['isCardHolder'] === '0' ? false : true;
+      }
+
       return {
         ...state,
         data: {
@@ -183,6 +190,7 @@ export const reducer: GenericReducerFn<ContextStateType, ContextActionType> = (s
                   newAmount: (action.payload['amount'] === 'otherAmount') ? action.payload['newAmount'] : '',
                 }
               : action.payload,
+              isCardHolder,
           },
         },
       }
