@@ -242,7 +242,6 @@ const Component: React.FunctionComponent<{}> = memo(() => {
                 value='otherAmount'
                 checkedValue={payment.amount}
                 onChangeHandler={onChangeHandler}
-                customCss={css``}
                 dataSchema='payment'
               />
             </Form.Group>
@@ -260,6 +259,7 @@ const Component: React.FunctionComponent<{}> = memo(() => {
                   <Elements.Input
                     name='newAmount'
                     type='text'
+                    disabled={!(payment.amount === 'otherAmount')}
                     value={payment.newAmount}
                     placeholder={`Ej. ${appData.settings.general.amounts.currency}${appData.settings.general.amounts.min_other_amount}`}
                     maxLength={8}
