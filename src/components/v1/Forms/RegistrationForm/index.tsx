@@ -692,7 +692,7 @@ const Component: React.FunctionComponent<{}> = memo(() => {
                 >
                   <option value=""></option>
                   {(cities || []).map((city: CityType) => (
-                    <option key={city.code} value={city.code !== '' ? city.code : city.name}>{city.name}</option>
+                    <option key={city.name} value={city.code !== '' ? city.code : city.name}>{city.name}</option>
                   ))}
                 </Elements.Select>
               </Form.Group>
