@@ -171,7 +171,7 @@ const MercadopagoCheckoutForm: React.FunctionComponent<{}> = () => {
     dispatchFormErrors({ type: 'SUBMIT' });
 
     const tokenPayload = {
-      cardholderName: (document.getElementById('cardholderName') as HTMLInputElement).value ?? '',
+      cardholderName: (document.getElementById('cardHolderName') as HTMLInputElement).value ?? '',
       identificationType: (document.getElementById('identificationType') as HTMLInputElement).value ?? '',
       identificationNumber: (document.getElementById('docNumber') as HTMLInputElement).value ?? '',
     };
