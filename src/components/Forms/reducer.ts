@@ -90,7 +90,7 @@ export const initialState: ContextStateType = {
         email: 'doe.deer@email.com',
         genre: 'No binario',
         phoneNumber: '44440000',
-        areaCode: '11',
+        areaCode: '',
         docNumber: '9876543210',
         docType: 'DNI',
         address: 'Av. Libertador',
