@@ -12,9 +12,8 @@ import { AppContext } from "../../../../App/context";
 import { FormContext } from "../../../context";
 
 const Component: React.FunctionComponent<{}> = () => {
-  const { searchParams, urlSearchParams } = useQuery();
+  const { urlSearchParams } = useQuery();
   const { appData } = useContext(AppContext);
-  const { data: { payment, user } } = useContext(FormContext);
   const { params } = useContext(CheckoutFormContext);
   const navigate = useNavigate();
   
@@ -40,7 +39,7 @@ const Component: React.FunctionComponent<{}> = () => {
       if(appData?.settings?.services?.forma?.form_id) {
         await postRecord(
           {
-            address: `${localData.direccion} ${localData.numero}`,
+            address: `${localData.calle} ${localData.numero}`,
             amount: localData.monto,
             appUiVersion: appData.features.use_design_version,
             appName: appData.name,
@@ -84,12 +83,23 @@ const Component: React.FunctionComponent<{}> = () => {
           appData?.settings?.services?.forma?.form_id,
         );
       }
+
       const timer = setTimeout(() => {
+        const urlParams = new URLSearchParams(window.location.search) // Ej. // TBK_TOKEN=01ab47587b3d872a19823c8aa685a777978f5b57094d78ce32a164400ae6ee44&TRANSACCION_ID=276
+
+        if(urlParams.get('TBK_TOKEN')) {
+          urlParams.delete('TBK_TOKEN');
+        }
+
+        if(urlParams.get('TRANSACCION_ID')) {
+          urlParams.delete('TRANSACCION_ID');
+        }
+
         navigate({
           pathname: generatePath(`/:couponType/forms/thank-you`, {
             couponType: `${params.couponType}`,
           }),
-          search: `${searchParams}`,
+          search: urlParams.toString(),
         }, { replace: true });
       }, 1000);
 

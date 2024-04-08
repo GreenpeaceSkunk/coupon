@@ -33,7 +33,7 @@ const Component: React.FunctionComponent<{}> = () => {
           apellido: user.lastName,
           rut: user.docNumber,
           email: user.email,
-          prefijo: user.areaCode,
+          prefijo: `${user.areaCode}`,
           telefono: user.phoneNumber,
           fechaNacimiento: moment(user.birthDate, 'DD/MM/YYYY').format('YYYY-MM-DD'),
           pais: user.country,
