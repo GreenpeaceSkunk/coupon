@@ -49,7 +49,7 @@ const Component: React.FunctionComponent<{}> = () => {
           utmContent: urlSearchParams.get('utm_content') || 'undefined',
           utmTerm: urlSearchParams.get('utm_term') || 'undefined',
           tipoDonacion: params.couponType,
-          titular: payment.isCardHolder,
+          titular: Boolean((+payment.isCardHolder)),
           tarjetaHabienteRut: payment.isCardHolder ? user.docNumber : payment.docNumber,
           tarjetaHabienteNombre: payment.isCardHolder ? `${user.firstName} ${user.lastName}` : payment.cardHolderName,
           response_url: window.location.origin + generatePath(`/coupon/:couponType/forms/checkout/transbank/confirm`, {

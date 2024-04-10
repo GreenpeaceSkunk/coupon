@@ -69,12 +69,11 @@ const defaultData = {
     docNumber: '',
     docType: '',
     newAmount: '',
-    isCardHolder: true,
+    isCardHolder: false,
     paymentType: 'credit_card',
     bankName: '',
     bankAccountType: '',
     bankAccountNumber: '',
-    paymentHolderName: '',
   } as IPaymentData,
 } as IData;
 
@@ -90,10 +89,12 @@ export const initialState: ContextStateType = {
         email: 'doe.deer@email.com',
         genre: 'No binario',
         phoneNumber: '44440000',
-        areaCode: '',
-        docNumber: '9876543210',
-        docType: 'DNI',
-        address: 'Av. Libertador',
+        areaCode: '012',
+        docNumber: '11111111',
+        // docType: 'DNI',
+        docType: 'PP',
+        // address: 'Av. Libertador',
+        address: 'Calle 1000',
         addressNumber: '8734',
         citizenId: '',
         constituentId: '',
@@ -105,28 +106,30 @@ export const initialState: ContextStateType = {
         referredLastName: 'Doe',
         referredPhoneNumber: '98765432',
         zipCode: 'CP1429',
+        province: '003',
+        city: 'Amalfi',
       } : {}),
     } as IUserData,
     payment: {
       ...defaultData.payment,
       ...(autofill ? {
-        cardType: '2',
-        cardNumber: '4509953566233704',
+        // cardType: '2',
+        // cardNumber: '4509953566233704',
         // cardNumber: '4509953566233704', // Visa
-        // cardNumber: '5031755734530604', // Mastercard
+        cardNumber: '5031755734530604', // Mastercard
         // cardNumber: '371180303257522', // AMEX
-        securityCode: '',
-        // securityCode: '1234',
-        cardHolderName: 'APRO',
+        // securityCode: '',
+        securityCode: '123',
+        cardHolderName: 'Jhon Doe',
+        // cardHolderName: 'APRO',
         // cardExpirationMonth: '11',
         // cardExpirationYear: '2025',
         docType: 'CC',
-        docNumber: '102345678',
+        docNumber: '22222222',
         cardExpiration: '11/27',
-        bankName: 'bank_2',
-        bankAccountType: 'AHORROS',
-        bankAccountNumber: '555555',
-        paymentHolderName: 'Jhon Doe',
+        // bankName: 'bank_2',
+        // bankAccountType: 'AHORROS',
+        // bankAccountNumber: '555555',
         // docType: 'DNI',
       } : {})
     } as IPaymentData,
@@ -146,6 +149,12 @@ export const initialState: ContextStateType = {
 };
 
 export const reducer: GenericReducerFn<ContextStateType, ContextActionType> = (state: ContextStateType, action: ContextActionType) => {
+  let isCardHolder = state.data.payment.isCardHolder;
+
+  if(action.type === 'UPDATE_USER_DATA' || action.type === 'UPDATE_PAYMENT_DATA') {
+    isCardHolder = (+(action.payload.hasOwnProperty('isCardHolder') ? action.payload['isCardHolder'] : isCardHolder) === 0 ? false : true)
+  }
+
   switch (action.type) {
     case 'UPDATE_FIELD':
       return {
@@ -170,27 +179,30 @@ export const reducer: GenericReducerFn<ContextStateType, ContextActionType> = (s
             ...state.data.user,
             ...action.payload,
           },
+          payment: {
+            ...state.data.payment,
+            ...(isCardHolder && (action.payload['docType'] || action.payload['docNumber'])) ? action.payload : null,
+          }
         },
       }
     case 'UPDATE_PAYMENT_DATA':
-      let isCardHolder =  state.data.payment.isCardHolder;
-      if(action.payload['isCardHolder']) {
-        isCardHolder = action.payload['isCardHolder'] === '0' ? false : true;
-      }
-
       return {
         ...state,
         data: {
+          isCardHolder,
           ...state.data,
           payment: {
             ...state.data.payment,
+            ...isCardHolder ? {
+              docType: state.data.user.docType,
+              docNumber: state.data.user.docNumber,
+            } : null,
             ...action.payload['amount']
               ? {
                   amount: action.payload['amount'],
                   newAmount: (action.payload['amount'] === 'otherAmount') ? action.payload['newAmount'] : '',
                 }
               : action.payload,
-              isCardHolder,
           },
         },
       }

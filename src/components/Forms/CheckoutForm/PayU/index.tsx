@@ -47,7 +47,7 @@ const CheckoutForm: React.FunctionComponent<{}> = () => {
 
   const onSubmitHandler = useCallback(async (evt: FormEvent) => {
     evt.preventDefault();
-    
+
     if(!allowNext) {
       setShowFieldErrors(true);
 
@@ -86,19 +86,20 @@ const CheckoutForm: React.FunctionComponent<{}> = () => {
           } : (payment.paymentType === 'credit_card') ? {
             tipo_documento_tarjetahabiente: payment.docType,
             numero_documento_tarjetahabiente: payment.docNumber,
-            nombre_apellido_tarjetahabiente: payment.paymentHolderName,
+            nombre_apellido_tarjetahabiente: payment.cardHolderName,
             numero_tarjeta: parseInt(payment.cardNumber),
             cvv: parseInt(payment.securityCode),
             metodo_pago: appData.settings.general.form_fields.checkout.card_types.values.find((ct: any) => ct.value == payment.cardType).slug.toUpperCase(),
             fecha_vencimiento_tarjeta: moment(payment.cardExpiration, 'MM/YYYY').format('YYYY/MM')
           } : null,
-        }
+        },
       );
 
-      // if(response.status === 400) {
+      // Do not remove this code
+      // if(response.error) {
       //   dispatchFormErrors({
       //     type: 'SET_ERROR',
-      //     error: `Hay errores en los siguientes campos: ${Object.values(response.data).map((e: any) => `"<strong>${e[0]}</strong>"`)}`,
+      //     error: `${response.message}`,
       //   });
 
       //   dispatchFormErrors({ type: 'SUBMITTED' });
@@ -146,7 +147,7 @@ const CheckoutForm: React.FunctionComponent<{}> = () => {
             txnDate: today,
             txnErrorCode: '',
             txnType: 'payu',
-            txnErrorMessage: response.status === 400 ? `${Object.keys(response.data).length > 1 ? "Errores" : "Error"} en ${Object.keys(response.data).map((e: any) => `"${e}"`)}`.replace(/,/g, '|') : '',
+            txnErrorMessage: response.status === 400 ? response.message.replace(/,/g, '|') : '',
             txnStatus: response.status === 400 ? 'pending' : 'done',
             urlQueryParams: `${searchParams}`,
             userAgent: window.navigator.userAgent.replace(/;/g, '').replace(/,/g, ''),
@@ -449,6 +450,28 @@ const CheckoutForm: React.FunctionComponent<{}> = () => {
         <Form.Row>
           <Form.Column>
             <Form.Group
+              value={payment.cardHolderName}
+              fieldName='cardHolderName'
+              labelText='Nombre completo del titular'
+              validateFn={validateCardHolderName}
+              onUpdateHandler={onUpdateFieldHandler}
+              showErrorMessage={showFieldErrors}
+            >
+              <Elements.Input
+                type='text'
+                id='cardHolderName'
+                name='cardHolderName'
+                data-checkout='cardHolderName'
+                placeholder='Daniela Lopez'
+                value={payment.cardHolderName}
+                onChange={onChangeHandler}
+              />
+            </Form.Group>
+          </Form.Column>
+        </Form.Row>
+        <Form.Row>
+          <Form.Column>
+            <Form.Group
               fieldName='docType'
               value={payment.docType}
               labelText='Tipo de documento'
@@ -462,6 +485,8 @@ const CheckoutForm: React.FunctionComponent<{}> = () => {
                 data-checkout="docType"
                 value={payment.docType}
                 onChange={onChangeHandler}
+                disabled={+payment.isCardHolder === 1}
+                data-schema='payment'
               >
                 <option value=""></option>
                 {(appData.settings.general.form_fields.shared.identification_types.values || []).map((doc: IdentificationType) => (
@@ -496,28 +521,8 @@ const CheckoutForm: React.FunctionComponent<{}> = () => {
                 data-checkout='docNumber'
                 value={payment.docNumber}
                 onChange={onChangeHandler}
-              />
-            </Form.Group>
-          </Form.Column>
-        </Form.Row>
-        <Form.Row>
-          <Form.Column>
-            <Form.Group
-              value={payment.paymentHolderName}
-              fieldName='paymentHolderName'
-              labelText='Nombre completo del titular'
-              validateFn={validateCardHolderName}
-              onUpdateHandler={onUpdateFieldHandler}
-              showErrorMessage={showFieldErrors}
-            >
-              <Elements.Input
-                type='text'
-                id='paymentHolderName'
-                name='paymentHolderName'
-                data-checkout='paymentHolderName'
-                placeholder='Daniela Lopez'
-                value={payment.paymentHolderName}
-                onChange={onChangeHandler}
+                disabled={+payment.isCardHolder === 1}
+                data-schema='payment'
               />
             </Form.Group>
           </Form.Column>

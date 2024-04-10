@@ -108,6 +108,10 @@ export const Select = styled(Elements.Select)`
   ${sharedInputStyles};
   background: url(${Icons.SelectArrowIcon}) no-repeat right ${pixelToRem(14)} top 50% white;
   cursor: pointer;
+  &:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
   ${customStyles};
 `;
 export const Span = styled(Elements.Span)`

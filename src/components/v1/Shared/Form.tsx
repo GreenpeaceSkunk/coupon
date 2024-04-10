@@ -1,10 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { memo, useContext, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { pixelToRem, CustomCSSType } from 'meema.utils';
-import { OnChangeEvent, OnClickEvent } from 'greenpeace';
-import { ValidationType } from '../../../utils/validators';
+import { OnChangeEvent, OnClickEvent, IdentificationType } from 'greenpeace';
+import { ERROR_CODES, ValidationType, validateCustomRegExp } from '../../../utils/validators';
 import Icons from '../../../images/icons';
 import Elements from '../../Shared/Elements';
+import { ContextActionType } from '../../Forms/reducer';
+import { AppContext } from '../../App/context';
+import { FormContext } from '../../Forms/context';
 
 /**
  * Defines margin right and left. Also resets margins at first and last child.
@@ -468,6 +471,102 @@ const ErrorMessage = styled(Elements.Wrapper)`
   }
 `;
 
+export const UserDocument: React.FunctionComponent<{
+  docType: string;
+  docNumber: string;
+  dataSchema: 'user' | 'payment';
+  disabled?: boolean;
+  onChangeHandler: (evt: OnChangeEvent) => void;
+  onUpdateFieldHandler: (fieldName: string, isValid: boolean, value: any) => void;
+  dispatch: (action: ContextActionType | any) => void;
+}> = memo(
+  ({ docType, docNumber, dataSchema, disabled = false, onChangeHandler, onUpdateFieldHandler, dispatch }) => {
+    const { appData } = useContext(AppContext);
+    const [identificationType, setIdentificationType] = useState<IdentificationType | null>();
+    const { data: { user } } = useContext(FormContext);
+
+    useEffect(() => {
+      setIdentificationType(
+        appData.settings.general.form_fields.shared.identification_types.values.find(
+          (d: {type: string, value: string}) => d.type === docType
+        )
+      );
+    }, [appData, docType]);
+
+    useEffect(() => {
+      dispatch({
+        type: `UPDATE_${dataSchema.toUpperCase()}_DATA`,
+        payload: { ['docType']: docType }
+      });
+      
+      dispatch({
+        type: `UPDATE_${dataSchema.toUpperCase()}_DATA`,
+        payload: { ['docNumber']: docNumber }
+      });
+    }, [docType, docNumber]);
+
+    return (
+      <>
+        <Group
+          fieldName='docType'
+          value={docType}
+          labelText='Tipo de documento'
+          showErrorMessage={true}
+          validateFn={() => validateCustomRegExp('^[a-zA-Z\s]{1,}$', docType, ERROR_CODES['013'])}
+          onUpdateHandler={onUpdateFieldHandler}
+        >
+          <Elements.Select
+            id="docType"
+            name="docType"
+            data-checkout="docType"
+            value={docType}
+            onChange={onChangeHandler}
+            data-schema={dataSchema}
+            disabled={disabled}
+          >
+            <option value=""></option>
+            {(appData.settings.general.form_fields.shared.identification_types.values || []).map((doc: IdentificationType) => (
+              <option key={doc.type} value={doc.type}>{doc.value}</option>
+            ))}
+          </Elements.Select>
+        </Group>
+        <Group
+          fieldName='docNumber'
+          value={user.docNumber}
+          labelText='Número de documento'
+          showErrorMessage={true}
+          onUpdateHandler={onUpdateFieldHandler}
+          validateFn={() => {
+            if(identificationType) {
+              console.log(new RegExp(identificationType.validator.expression).test(docNumber))
+              return {
+                isValid: new RegExp(identificationType.validator.expression).test(docNumber),
+                errorMessage: ERROR_CODES["324"],
+              }
+            }
+            return {
+              isValid: false,
+              errorMessage: ERROR_CODES["324"],
+            }
+          }}
+        >
+          <Elements.Input
+            type='text'
+            id='docNumber'
+            name='docNumber'
+            placeholder={identificationType?.placeholder || ''}
+            data-checkout='docNumber'
+            value={docNumber}
+            onChange={onChangeHandler}
+            data-schema={dataSchema}
+            disabled={disabled}
+          />
+        </Group>
+      </>
+    )
+  }
+);
+
 const defaults = {
   Content,
   Row,
@@ -482,6 +581,7 @@ const defaults = {
   Title,
   ErrorMessage,
   MPSecurityFieldWrapper,
+  UserDocument,
 };
 
 export default defaults;

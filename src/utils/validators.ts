@@ -21,6 +21,9 @@ export const ERROR_CODES = {
   '001': 'Valor incorrecto',
   '002': 'Código de area incorrecto',
   '003': 'Teléfono incorrecto',
+  '004': 'Asegurate que el nombre sea correcto.',
+  '005': 'Asegurate que el apellido sea correcto.',
+  '013': 'Asegurate de que el campo no esté vacío',
   '324': 'El documento es inválido.',
 }
 
@@ -53,16 +56,16 @@ export const validateField = (value: string): ValidationType => {
 };
 
 export const validateEmptyField = (value: string): ValidationType => {
-  if(value === '') {
+  if(new RegExp('^[a-zA-Z0-9\s_-]{1,}$').test(value)) {
     return {
-      isValid: false,
-      errorMessage: ERROR_CODES['SK012'],
-    };
+      isValid: true,
+      errorMessage: '',
+    }
   }
   
   return {
-    isValid: true,
-    errorMessage: '',
+    isValid: false,
+    errorMessage: ERROR_CODES['013'],
   };
 }
 

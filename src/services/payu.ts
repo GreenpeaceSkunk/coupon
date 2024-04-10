@@ -11,10 +11,11 @@ export const suscribe = async (data: any): Promise<any | AxiosResquestError> => 
   });
 
   if(response.error) {
-    console.log(response)
     return {
-      message: response.data || 'API PayU: unexpected error.',
-      data: response.data.validationErrors || {},
+      error: true,
+      message: (response.data.messages.length && response.data.validationErrors)
+        ? Object.values(response.data.validationErrors).map((e: any) => `<strong>${e[0]}</strong>`)
+        : response.data.messages[0],
       status: response.status,
     } as AxiosResquestError;
   }

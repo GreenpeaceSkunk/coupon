@@ -132,7 +132,6 @@ export interface IPaymentData {
   bankName?: string;
   bankAccountType?: string;
   bankAccountNumber?: string;
-  paymentHolderName?: string;
 }
 
 export interface IData {
