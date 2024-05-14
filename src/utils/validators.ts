@@ -356,7 +356,12 @@ export const validateNewAmount = (value: string, minValue = 300): ValidationType
 }
 
 export const validateCustomRegExp = (regExp: string, value = '', errorMessage = ERROR_CODES['001']): ValidationType => {
-  if(new RegExp(regExp).test(value)) {
+  if(typeof value === 'string' && new RegExp(regExp).test(value.split(' ').length === 2 && value.split(' ')[1] === '' ? value.trim() : value)) {
+    return {
+      isValid: true,
+      errorMessage: '',
+    }
+  } else if (new RegExp(regExp).test(value)) {
     return {
       isValid: true,
       errorMessage: '',

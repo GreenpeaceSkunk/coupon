@@ -148,13 +148,6 @@ const Component: React.FunctionComponent<{}> = memo(() => {
         payload: { ['country']: appData.country }
       });
 
-      if(appData.settings.general.form_fields.registration.area_code?.default) {
-        dispatch({
-          type: 'UPDATE_FIELD',
-          payload: { ['areaCode']: appData.settings.general.form_fields.registration.area_code.default }
-        });
-      }
-
       if(appData.settings.general.form_fields.registration.phone_number?.default) {
         dispatch({
           type: 'UPDATE_FIELD',
@@ -299,7 +292,7 @@ const Component: React.FunctionComponent<{}> = memo(() => {
               value={user.firstName}
               labelText='Nombre'
               showErrorMessage={showFieldErrors}
-              validateFn={() => validateCustomRegExp('^[a-zA-Z\s]{2,}$', user.firstName, ERROR_CODES['004'])}
+              validateFn={() => validateCustomRegExp("^(?=.{2,40}$)[a-zA-Z]+(?:[-' ][a-zA-Z]+)*$", user.firstName, ERROR_CODES['004'])}
               onUpdateHandler={onUpdateFieldHandler}
             >
               <Elements.Input
@@ -316,7 +309,7 @@ const Component: React.FunctionComponent<{}> = memo(() => {
               value={user.lastName}
               labelText='Apellido'
               showErrorMessage={showFieldErrors}
-              validateFn={() => validateCustomRegExp('^[a-zA-Z\s]{2,}$', user.lastName, ERROR_CODES['005'])}
+              validateFn={() => validateCustomRegExp("^(?=.{2,40}$)[a-zA-Z]+(?:[-' ][a-zA-Z]+)*$", user.lastName, ERROR_CODES['005'])}
               onUpdateHandler={onUpdateFieldHandler}
             >
               <Elements.Input

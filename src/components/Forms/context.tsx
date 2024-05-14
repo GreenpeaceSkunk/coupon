@@ -43,20 +43,22 @@ const ContextProvider: React.FunctionComponent<IProps> = ({ children }) => {
   }, [appData]);
 
   useEffect(() => {
-    if(data.user.province) {
-      const province = shared.provinces?.find((province: ProvinceType) => province.code === data.user.province);
+    if(shared.cities && shared.cities.length && appData.settings.general.form_fields.registration.location.city?.default) {
+      dispatch({
+        type: 'UPDATE_FIELD',
+        payload: { ['city']: appData.settings.general.form_fields.registration.location.city.default }
+      });
+    }
+  }, [shared.cities])
+
+  useEffect(() => {
+    if(data.user.province !== '') {
       const region = shared.regions?.find((region: RegionType) => region.provinces.find((prv: ProvinceType) => {
         if(data.user.province === prv.code) {
           return prv.code;
         }
       }));
-      
-      dispatch({
-        type: 'SET_SHARED_FORM_FIELDS',
-        payload: {
-          cities: province ? province.cities : [],
-        },
-      });
+      const province = shared.provinces?.find((province: ProvinceType) => province.code === data.user.province);
 
       dispatch({
         type: 'UPDATE_USER_DATA',
@@ -65,20 +67,45 @@ const ContextProvider: React.FunctionComponent<IProps> = ({ children }) => {
           city: '',
         },
       });
+
+      dispatch({
+        type: 'SET_SHARED_FORM_FIELDS',
+        payload: {
+          cities: province ? province.cities : [],
+        },
+      });
     }
   }, [ data.user.province ])
 
   useEffect(() => {
     (async () => {
-      if(data.user.country && appData.settings.general.form_fields.registration.location.province.show) {
+      if(appData && data.user.country !== '') {
         const countryData = (await (await fetch(`${process.env.REACT_APP_GREENLAB_API_URL}/location/world/countries/${data.user.country}`)).json());
-        dispatch({
-          type: 'SET_SHARED_FORM_FIELDS',
-          payload: {
-            regions: countryData.regions,
-            provinces: countryData.regions.map((region: RegionType) => region.provinces).flatMap((province: ProvinceType) => province),
-          },
-        });
+
+        if(countryData.regions) {
+          dispatch({
+            type: 'SET_SHARED_FORM_FIELDS',
+            payload: {
+              regions: countryData.regions,
+              provinces: countryData.regions.map((region: RegionType) => region.provinces).flatMap((province: ProvinceType) => province),
+            },
+          });
+
+          // Set default fields
+          if(appData.settings.general.form_fields.registration.location.province?.default) {
+            dispatch({
+              type: 'UPDATE_FIELD',
+              payload: { ['province']: appData.settings.general.form_fields.registration.location.province.default }
+            });
+          }
+        }
+
+        if(appData.settings.general.form_fields.registration.area_code?.default) {
+          dispatch({
+            type: 'UPDATE_FIELD',
+            payload: { ['areaCode']: appData.settings.general.form_fields.registration.area_code.default }
+          });
+        }
       }
     })();
   }, [appData, data.user.country]);
