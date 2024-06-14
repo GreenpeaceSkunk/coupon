@@ -88,7 +88,7 @@ const CheckoutForm: React.FunctionComponent<{}> = () => {
             numero_documento_tarjetahabiente: payment.docNumber,
             nombre_apellido_tarjetahabiente: payment.cardHolderName,
             numero_tarjeta: parseInt(payment.cardNumber),
-            cvv: parseInt(payment.securityCode),
+            cvv: payment.securityCode,
             metodo_pago: appData.settings.general.form_fields.checkout.card_types.values.find((ct: any) => ct.value == payment.cardType).slug.toUpperCase(),
             fecha_vencimiento_tarjeta: moment(payment.cardExpiration, 'MM/YYYY').format('YYYY/MM')
           } : null,
