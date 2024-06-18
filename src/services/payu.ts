@@ -1,5 +1,6 @@
 import { AxiosResquestError } from 'greenpeace';
 import { ApiCall } from '../utils/apiCall';
+import { getApiUrl } from '../utils';
 
 type PayUSuscribeResponse = {OK: boolean};
 

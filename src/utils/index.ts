@@ -1,3 +1,15 @@
+export const getApiUrl = (): string => {
+  return (`${process.env.REACT_APP_ENVIRONMENT}` === 'development')
+    ? `${process.env.REACT_APP_GREENLAB_API_URL}`
+    : `${window.location.origin}${process.env.REACT_APP_GREENLAB_API_URL}`;
+}
+
+export const getApiImagesUrl = (): string => {
+  return (`${process.env.REACT_APP_ENVIRONMENT}` === 'development')
+    ? `${process.env.REACT_APP_GREENLAB_API_IMAGES}`
+    : `${window.location.origin}${process.env.REACT_APP_GREENLAB_API_IMAGES}`;
+}
+ 
 export const parseAmount = (value1?: string, value2?: string) => {
   return (value1 === 'otherAmount') ? value2 : value1;
 }

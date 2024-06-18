@@ -4,9 +4,9 @@ import { pixelToRem, CustomCSSType } from 'meema.utils';
 import { css } from 'styled-components';
 import { AppContext } from '../../App/context';
 import GreenpeaceLogo from '../../../images/greenpeace-logo.svg';
-import { getApiImagesUrl } from '../../../services/greenlab';
 import ReactPlayer from 'react-player/lazy';
 import { Loader } from '../../Shared';
+import { getApiImagesUrl } from '../../../utils';
 
 const MainHeader: FunctionComponent<{
   customCss?: CustomCSSType;

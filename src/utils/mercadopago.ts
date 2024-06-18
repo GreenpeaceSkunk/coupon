@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { CustomHTMLScriptElement, IData } from 'greenpeace';
+import { getPublicKey } from '../services/mercadopago';
 
 export type CardType = {
   id: number;
@@ -37,14 +38,11 @@ export const initialize = () => {
   (async () => {
     await initializeSdk();
     await initializeSecurityPayment();
-
-    const user = await axios({
-      url: `${process.env.REACT_APP_GREENPEACE_MERCADOPAGO_API_URL}/getPublicKey`,
-      method: 'GET',
-    });
-
-    if(user) {
-      const mp = new window.MercadoPago(user.data, {
+    
+    const publicKey = await getPublicKey();
+    
+    if(publicKey) {
+      const mp = new window.MercadoPago(publicKey, {
         locale: "en-US",
         advancedFraudPrevention: true,
       });

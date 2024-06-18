@@ -1,18 +1,6 @@
 import { ApiCall } from '../utils/apiCall';
-import { getCouponUrl } from '../utils';
+import { getApiUrl, getCouponUrl } from '../utils';
 
-export const getApiUrl = (): string => {
-  return (`${process.env.REACT_APP_ENVIRONMENT}` === 'development')
-    ? `${process.env.REACT_APP_GREENLAB_API_URL}`
-    : `${window.location.origin}${process.env.REACT_APP_GREENLAB_API_URL}`;
-}
-
-export const getApiImagesUrl = (): string => {
-  return (`${process.env.REACT_APP_ENVIRONMENT}` === 'development')
-    ? `${process.env.REACT_APP_GREENLAB_API_IMAGES}`
-    : `${window.location.origin}${process.env.REACT_APP_GREENLAB_API_IMAGES}`;
-}
- 
 export const createContact = async (data: any) => {
   try {
     const response = await ApiCall({
