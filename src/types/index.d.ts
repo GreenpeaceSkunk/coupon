@@ -128,7 +128,7 @@ export interface IPaymentData {
   amount: string;
   newAmount: string;
   isCardHolder: boolean;
-  paymentType?: 'bank_account' | 'credit_card';
+  paymentType?: '' | 'bank_account' | 'credit_card' | 'debit_card';
   bankName?: string;
   bankAccountType?: string;
   bankAccountNumber?: string;

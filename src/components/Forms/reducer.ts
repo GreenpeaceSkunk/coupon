@@ -70,7 +70,7 @@ const defaultData = {
     docType: '',
     newAmount: '',
     isCardHolder: false,
-    paymentType: 'credit_card',
+    paymentType: '',
     bankName: '',
     bankAccountType: '',
     bankAccountNumber: '',

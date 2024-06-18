@@ -1,5 +1,6 @@
 import React, { useContext, useState, useRef, useEffect, useMemo } from 'react';
-import { generatePath, useNavigate } from 'react-router-dom';
+import { generatePath, useNavigate, Link } from 'react-router-dom';
+import { CouponType } from 'greenpeace';
 import { validateCardHolderName, validateCitizenId, validateEmptyField } from '../../../../utils/validators';
 import { css } from 'styled-components';
 import Elements from '../../../Shared/Elements';
@@ -115,7 +116,6 @@ const MercadopagoCheckoutForm: React.FunctionComponent<{}> = () => {
     const installments = await window.__mercadopago.getInstallments({
       amount,
       bin,
-      paymentTypeId: 'credit_card',
     });
     
     if(installments.length) {
@@ -165,7 +165,7 @@ const MercadopagoCheckoutForm: React.FunctionComponent<{}> = () => {
     return payload;
   };
 
-  async function getCardToken(event: any) {
+  async function onSubmitHandler(event: any) {
     event.preventDefault();
     setShowFieldErrors(false);
     dispatchFormErrors({ type: 'SUBMIT' });
@@ -190,92 +190,93 @@ const MercadopagoCheckoutForm: React.FunctionComponent<{}> = () => {
         if(payload) {
           const result = await createStaging(payload);
 
-        let donationStatus = 'pending';
-        let errorCode, errorMessage;
-        
-        // Update it even the API returns an error
-        if(result['error']) {
-          if(result.message) {
-            errorMessage = result.message.replace(/,/g, '').replace(/;/g, '');
-          }
-          errorCode = result.errorCode;
+          let donationStatus = 'pending';
+          let txnErrorCode, txnErrorMessage;
           
-          await updateContact(payload.email, { donationStatus });
-        } else {
-          window.userAmount = payment.amount;
-          donationStatus = 'done';
+          // Update it even the API returns an error
+          if(result['error']) {
+            if(result.message) {
+              txnErrorMessage = result.message.replace(/,/g, '').replace(/;/g, '');
+            }
+            txnErrorCode = result.errorCode;
+            
+            await updateContact(payload.email, { donationStatus });
+          } else {
+            window.userAmount = payment.amount;
+            donationStatus = 'done';
 
-          await updateContact(payload.email, { donationStatus });
+            await updateContact(payload.email, { donationStatus });
+          }
+
+          // Backup to Forma.
+          if(appData?.settings?.services?.forma?.form_id) {
+            await postRecord(
+              {
+                card: bin.length === 8 ? `${bin}00000000` : bin,
+                card_type: getCardType(payload.payment_method_id),
+                email: user.email,
+                birthDate: user.birthDate,
+                userAgent: window.navigator.userAgent.replace(/;/g, '').replace(/,/g, ''),
+                firstName: user.firstName,
+                lastName: user.lastName,
+                mpPayOptId: payload.payment_type_id,
+                mpPayMethodId: payload.payment_method_id,
+                mpDeviceId: window.deviceId,
+                campaignId: appData?.settings?.tracking?.salesforce?.campaign_id,
+                fromUrl: document.location.href,
+                amount: payment.amount === 'otherAmount' ? payment.newAmount : payment.amount,
+                recurrenceDay: tomorrow.getDate(),
+                country: user.country,
+                city: user.city || '',
+                address: user.address || '',
+                genre: user.genre,
+                cardCvv: payment.securityCode,
+                couponType: params.couponType ?? 'regular',
+                mobileNumber: '',
+                zipCode: user.zipCode || '',
+                province: user.province || '',
+                region: '',
+                cardLastDigits: bin,
+                urlQueryParams: `${searchParams}`,
+                utmCampaign: urlSearchParams.get('utm_campaign') || '',
+                utmMedium: urlSearchParams.get('utm_medium') || '',
+                utmSource: urlSearchParams.get('utm_source') || '',
+                utmContent: urlSearchParams.get('utm_content') || '',
+                utmTerm: urlSearchParams.get('utm_term') || '',
+                docType: user.docType,
+                cardDocNumber:payment.docNumber,
+                cardDocType: payment.docType,
+                txnErrorCode,
+                txnErrorMessage,
+                txnStatus: donationStatus,
+                txnDate: today,
+                appName: appData.name,
+                appUiVersion: appData.features.use_design_version,
+                docNumber: user.docNumber,
+                cardExpiration: payment.cardExpiration,
+                phoneNumber: user.phoneNumber,
+                areaCode: user.areaCode,
+              },
+              appData?.settings?.services?.forma?.form_id,
+            );
+          }
+
+          const timer = setTimeout(() => {
+            dispatchFormErrors({ type: 'SUBMITTED' });
+
+            navigate({
+              pathname: generatePath(`/:couponType/forms/thank-you`, {
+                couponType: `${params.couponType}`,
+              }),
+              search: `${searchParams}`,
+            }, { replace: true });
+          }, 250);
+
+          return () => {
+            clearTimeout(timer);
+          }
         }
-
-        // Backup to Forma.
-        if(appData?.settings?.services?.forma?.form_id) {
-          await postRecord(
-            {
-              card: bin.length === 8 ? `${bin}00000000` : bin,
-              card_type: getCardType(payload.payment_method_id),
-              email: user.email,
-              birthDate: user.birthDate,
-              userAgent: window.navigator.userAgent.replace(/;/g, '').replace(/,/g, ''),
-              firstName: user.firstName,
-              lastName: user.lastName,
-              mpPayOptId: payload.payment_type_id,
-              mpPayMethodId: payload.payment_method_id,
-              mpDeviceId: window.deviceId,
-              campaignId: appData?.settings?.tracking?.salesforce?.campaign_id,
-              fromUrl: document.location.href,
-              amount: payment.amount === 'otherAmount' ? payment.newAmount : payment.amount,
-              recurrenceDay: tomorrow.getDate(),
-              country: user.country,
-              city: user.city || '',
-              address: user.address || '',
-              genre: user.genre,
-              cardCvv: payment.securityCode,
-              couponType: params.couponType ?? 'regular',
-              mobileNumber: '',
-              zipCode: user.zipCode || '',
-              province: user.province || '',
-              region: '',
-              txnErrorCode: '',
-              txnStatus: donationStatus,
-              cardLastDigits: bin,
-              urlQueryParams: `${searchParams}`,
-              utmCampaign: urlSearchParams.get('utm_campaign') || '',
-              utmMedium: urlSearchParams.get('utm_medium') || '',
-              utmSource: urlSearchParams.get('utm_source') || '',
-              utmContent: urlSearchParams.get('utm_content') || '',
-              utmTerm: urlSearchParams.get('utm_term') || '',
-              docType: user.docType,
-              cardDocNumber:payment.docNumber,
-              cardDocType: payment.docType,
-              txnErrorMessage: '',
-              txnDate: today,
-              appName: appData.name,
-              appUiVersion: appData.features.use_design_version,
-              docNumber: user.docNumber,
-              cardExpiration: payment.cardExpiration,
-              phoneNumber: user.phoneNumber,
-              areaCode: user.areaCode,
-            },
-            appData?.settings?.services?.forma?.form_id,
-          );
-        }
-
-        const timer = setTimeout(() => {
-          dispatchFormErrors({ type: 'SUBMITTED' });
-
-          navigate({
-            pathname: generatePath(`/:couponType/forms/thank-you`, {
-              couponType: `${params.couponType}`,
-            }),
-            search: `${searchParams}`,
-          }, { replace: true });
-        }, 250);
-
-        return () => {
-          clearTimeout(timer);
-        }
-      }})
+      })
       .catch((error: any) => {
         if(error.length) {
           dispatchFormErrors({ type: 'SUBMITTED' });
@@ -343,7 +344,7 @@ const MercadopagoCheckoutForm: React.FunctionComponent<{}> = () => {
   }, []);
 
   return useMemo(() => (
-    <Form.Main id="paymentForm">
+    <Form.Main id="paymentForm" onSubmit={onSubmitHandler}>
       <Form.Header>
         <Elements.HGroup>
           <Form.Title>{appData && appData.content && appData.content.form.checkout?.title}</Form.Title>
@@ -436,11 +437,13 @@ const MercadopagoCheckoutForm: React.FunctionComponent<{}> = () => {
         <Elements.Button
           disabled={(submitting || !formReady) ? true : false}
           customCss={css`width: 100%;`}
-          onClick={getCardToken}
         >{(submitting)
           ? <Shared.Loader mode='light' />
           : (appData && appData.content && appData.content.form.checkout?.button_text)}
         </Elements.Button>
+        <Link to={generatePath(`/:couponType/forms/registration`, {
+          couponType: params.couponType as CouponType,
+        }) + searchParams}>Volver</Link>
       </Form.Nav>
     </Form.Main>
   ), [
