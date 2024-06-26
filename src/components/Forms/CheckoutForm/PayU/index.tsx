@@ -38,6 +38,7 @@ const CheckoutForm: React.FunctionComponent<{}> = () => {
     identificationType,
     cardType,
     error,
+    dispatch,
     dispatchFormErrors,
     onChangeHandler,
     onUpdateFieldHandler,
@@ -188,6 +189,14 @@ const CheckoutForm: React.FunctionComponent<{}> = () => {
   useEffect(() => {
     dispatchFormErrors({type: 'RESET_FIELD_ERRORS'});
   }, [payment.paymentType]);
+
+  useEffect(() => {
+    // Force to define payment type by default
+    dispatch({
+      type: 'UPDATE_PAYMENT_DATA',
+      payload: { [ 'paymentType' ]: 'credit_card' }
+    });
+  }, []);
 
   return useMemo(() => (
     <Form.Main id="paymentForm" onSubmit={onSubmitHandler}>
@@ -565,6 +574,7 @@ const CheckoutForm: React.FunctionComponent<{}> = () => {
     urlSearchParams,
     identificationType,
     error,
+    dispatch,
     onSubmitHandler,
     onChangeHandler,
     onUpdateFieldHandler,
