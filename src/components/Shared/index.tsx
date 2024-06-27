@@ -5,12 +5,12 @@ import { css } from 'styled-components';
 import General from './General';
 import GreenpeaceLogo from '../../images/greenpeace-logo.svg';
 
-export const Logo: React.FunctionComponent<{ color?: 'white' | 'green'; customCss?: CustomCSSType }> = ({
+export const Logo: React.FunctionComponent<{ color?: string; customCss?: CustomCSSType }> = ({
   customCss,
   color,
 }) => (
   <Elements.A
-    href='https://greenpeace.org.ar'
+    href='https://greenpeace.org'
     customCss={css`
        ${(customCss) && customCss};
     `}
@@ -27,9 +27,7 @@ export const Logo: React.FunctionComponent<{ color?: 'white' | 'green'; customCs
         mask-size: 100%;
         mask-repeat: no-repeat;
       `}
-    >
-
-    </Elements.Wrapper>
+    />
   </Elements.A>
 );
 
