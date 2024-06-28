@@ -1,8 +1,9 @@
 import React, { FunctionComponent, useContext, useMemo } from 'react';
+import ReactPlayer from 'react-player/lazy';
 import Elements from '../../Shared/Elements';
 import { pixelToRem, CustomCSSType } from 'meema.utils';
 import { css } from 'styled-components';
-import { Logo } from '../../Shared';
+import { Loader, Logo } from '../../Shared';
 import { AppContext } from '../../App/context';
 
 const MainHeader: FunctionComponent<{
@@ -72,7 +73,7 @@ const MainHeader: FunctionComponent<{
             min-height: ${pixelToRem(appData.content.header.size.height.medium)} !important;
           }
 
-          @media (min-width: ${({theme}) => pixelToRem(theme.responsive.desktop.minWidth)}) {
+          @media (min-width: ${({theme}) => pixelToRem(theme.responsive.desktop.minWidth)})  {
             min-height: ${pixelToRem(appData.content.header.size.height.largw)} !important;
           }
         `}
@@ -85,11 +86,39 @@ const MainHeader: FunctionComponent<{
           <Logo color={appData.content.header.logo.color}/>
         )}
       </Elements.Wrapper>
-      {(appData.content.header?.banner?.type === "video") && (
+      {/* {(appData.content.header?.banner?.type === "video") && (
         <video autoPlay={true} muted={true} loop={true}>
           <source src={`${process.env.REACT_APP_GREENLAB_API_IMAGES}/${appData.content.header.banner.url}`} />
         </video>
-      )}
+      )} */}
+
+    {(appData.content.header?.banner?.type === "video") && (
+      <ReactPlayer
+        width={`100%`}
+        height={`400px`}
+        url={`https://www.youtube.com/watch?v=t4-sDoVfjxw `}
+        loop={true}
+        playing={true}
+        controls={false}
+        muted={true}
+        playbackRate={1}
+        onPause={() => {}}
+        onEnded={() => {}}
+        fallback={
+          <Elements.Wrapper customCss={css`
+            display: flex;
+            /* background: ${({theme}) => theme.color.secondary.dark};
+            font-family: ${({theme}) => theme.font.family.primary.regular}; */
+            color: white;
+            height: 100%; 
+            width: 100%;
+            font-size: ${pixelToRem(40)};
+          `}>
+            <Loader mode='light' />
+          </Elements.Wrapper>
+        }
+      />
+    )}
       <Elements.Wrapper
         customCss={css`
           display: flex;
