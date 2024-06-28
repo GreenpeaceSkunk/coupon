@@ -1,9 +1,8 @@
 import React, { FunctionComponent, useContext, useMemo } from 'react';
-import ReactPlayer from 'react-player/lazy';
 import Elements from '../../Shared/Elements';
 import { pixelToRem, CustomCSSType } from 'meema.utils';
 import { css } from 'styled-components';
-import { Loader, Logo } from '../../Shared';
+import { Logo } from '../../Shared';
 import { AppContext } from '../../App/context';
 
 const MainHeader: FunctionComponent<{
@@ -38,16 +37,7 @@ const MainHeader: FunctionComponent<{
           `}
 
           ${(appData.content.header?.banner?.type === "video") && css`
-            position: relative;
-            overflow: hidden;
-
-            video {
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              z-index: -1;
-            }
+            padding: ${pixelToRem(0)};ç
           `};
         ` : `
             background-image: linear-gradient(
@@ -65,19 +55,6 @@ const MainHeader: FunctionComponent<{
           min-height: ${({theme}) => pixelToRem(theme.header.desktop.height)};
         }
 
-        /* Only applied if sizes is overriden */
-        ${appData.content.header.size && appData.content.header.size.height && css`
-          min-height: ${pixelToRem(appData.content.header.size.height.small)} !important;
-
-          @media (min-width: ${({theme}) => pixelToRem(theme.responsive.tablet.minWidth)}) {
-            min-height: ${pixelToRem(appData.content.header.size.height.medium)} !important;
-          }
-
-          @media (min-width: ${({theme}) => pixelToRem(theme.responsive.desktop.minWidth)})  {
-            min-height: ${pixelToRem(appData.content.header.size.height.largw)} !important;
-          }
-        `}
-
         ${customCss && customCss};
       `}
     >
@@ -86,39 +63,21 @@ const MainHeader: FunctionComponent<{
           <Logo color={appData.content.header.logo.color}/>
         )}
       </Elements.Wrapper>
-      {/* {(appData.content.header?.banner?.type === "video") && (
-        <video autoPlay={true} muted={true} loop={true}>
-          <source src={`${process.env.REACT_APP_GREENLAB_API_IMAGES}/${appData.content.header.banner.url}`} />
-        </video>
-      )} */}
-
-    {(appData.content.header?.banner?.type === "video") && (
-      <ReactPlayer
-        width={`100%`}
-        height={`400px`}
-        url={`https://www.youtube.com/watch?v=t4-sDoVfjxw `}
-        loop={true}
-        playing={true}
-        controls={false}
-        muted={true}
-        playbackRate={1}
-        onPause={() => {}}
-        onEnded={() => {}}
-        fallback={
-          <Elements.Wrapper customCss={css`
-            display: flex;
-            /* background: ${({theme}) => theme.color.secondary.dark};
-            font-family: ${({theme}) => theme.font.family.primary.regular}; */
-            color: white;
-            height: 100%; 
+      {(appData.content.header?.banner?.type === "video") && (
+        <Elements.Wrapper
+          customCss={css`
             width: 100%;
-            font-size: ${pixelToRem(40)};
-          `}>
-            <Loader mode='light' />
-          </Elements.Wrapper>
-        }
-      />
-    )}
+
+            video {
+              width: 100%;
+            }
+          `}
+        >
+          <video autoPlay={true} muted={true} loop={true}>
+            <source src={`${process.env.REACT_APP_GREENLAB_API_IMAGES}/${appData.content.header.banner.url}`} />
+          </video>
+        </Elements.Wrapper>
+      )}
       <Elements.Wrapper
         customCss={css`
           display: flex;
@@ -134,7 +93,7 @@ const MainHeader: FunctionComponent<{
             }
           `}
         >
-          {appData && (
+          {appData.content.header.title && (
             <Elements.H1
               customCss={css`
                 color: white;
@@ -146,7 +105,7 @@ const MainHeader: FunctionComponent<{
                   font-size: ${pixelToRem(30)};
                 }
               `}
-            >{appData && appData.content && appData.content.header.title}</Elements.H1>
+            >{appData.content.header.title}</Elements.H1>
           )} 
         </Elements.HGroup>
       </Elements.Wrapper>
