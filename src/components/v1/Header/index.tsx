@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useContext, useMemo } from 'react';
+import React, { FunctionComponent, useContext, useEffect, useMemo, useRef } from 'react';
 import Elements from '../../Shared/Elements';
 import { pixelToRem, CustomCSSType } from 'meema.utils';
 import { css } from 'styled-components';
@@ -73,8 +73,9 @@ const MainHeader: FunctionComponent<{
             }
           `}
         >
-          <video autoPlay={true} muted={true} loop={true}>
+          <video autoPlay={true} muted={true} loop={true} playsInline={true} preload='auto'>
             <source src={`${process.env.REACT_APP_GREENLAB_API_IMAGES}/${appData.content.header.banner.url}`} />
+            Your browser does not support MP4 Format videos or HTML5 Video.
           </video>
         </Elements.Wrapper>
       )}
