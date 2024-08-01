@@ -110,20 +110,20 @@ const Component: React.FunctionComponent<{}> = memo(() => {
     console.log('Contact', contact);
     if(contact) {
       pushToDataLayer({ 'event' : 'petitionSignup' });
+    }
 
-      if(params) {
-        const {payment_gateway} = appData.features;
+    if(params) {
+      const {payment_gateway} = appData.features;
 
-        navigate({
-          pathname: generatePath('/:couponType/forms/:formType/:paymentGateway', {
-            couponType: `${params.couponType}`,
-            formType: 'checkout',
-            paymentGateway: payment_gateway.enabled && payment_gateway.third_party
-              ? `${payment_gateway.third_party}`.toLowerCase() : '',
-          }),
-          search: searchParams,
-        }, { replace: true });
-      }
+      navigate({
+        pathname: generatePath('/:couponType/forms/:formType/:paymentGateway', {
+          couponType: `${params.couponType}`,
+          formType: 'checkout',
+          paymentGateway: payment_gateway.enabled && payment_gateway.third_party
+            ? `${payment_gateway.third_party}`.toLowerCase() : '',
+        }),
+        search: searchParams,
+      }, { replace: true });
     }
   }, [
     user,
@@ -407,6 +407,62 @@ const Component: React.FunctionComponent<{}> = memo(() => {
                       onChangeHandler(evt as OnChangeEvent)
                     }}
                     dataSchema='payment'
+                  />
+                </Form.Group>
+              </Form.Column>
+            </Form.Row>
+            <Form.Row>
+              <Form.Column>
+                <Form.Group
+                  fieldName='docType'
+                  value={payment.docType}
+                  labelText='Tipo de documento'
+                  showErrorMessage={showFieldErrors}
+                  validateFn={validateEmptyField}
+                  onUpdateHandler={onUpdateFieldHandler}
+                >
+                  <Elements.Select
+                    id="docType"
+                    name="docType"
+                    value={payment.docType}
+                    onChange={onChangeHandler}
+                    data-schema='payment'
+                    disabled={`${payment.isCardHolder}` === '1'}
+                  >
+                    <option value=""></option>
+                    {(appData.settings.general.form_fields.shared.identification_types.values || []).map((doc: IdentificationType) => (
+                      <option key={doc.type} value={doc.type}>{doc.value}</option>
+                    ))}
+                  </Elements.Select>
+                </Form.Group>
+                <Form.Group
+                  fieldName='docNumber'
+                  value={payment.docNumber}
+                  labelText='Número de documento'
+                  showErrorMessage={showFieldErrors}
+                  onUpdateHandler={onUpdateFieldHandler}
+                  validateFn={() => {
+                    if(identificationType) {
+                      return {
+                        isValid: new RegExp(identificationType.validator.expression).test(payment.docNumber),
+                        errorMessage: ERROR_CODES["324"],
+                      }
+                    }
+                    return {
+                      isValid: false,
+                      errorMessage: ERROR_CODES["324"],
+                    }
+                  }}
+                >
+                  <Elements.Input
+                    type='text'
+                    id='docNumber'
+                    name='docNumber'
+                    placeholder={identificationType?.placeholder || ''}
+                    value={payment.docNumber}
+                    onChange={onChangeHandler}
+                    data-schema='payment'
+                    disabled={`${payment.isCardHolder}` === '1'}
                   />
                 </Form.Group>
               </Form.Column>
