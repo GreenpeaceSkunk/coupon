@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo } from "react"
+import React, { useContext, useEffect, useMemo, useState } from "react"
 import useQuery from "../../../../../hooks/useQuery";
 import { confirm } from "../../../../../services/transbank";
 import { useNavigate, generatePath } from "react-router";
@@ -9,27 +9,42 @@ import { Loader } from "../../../../Shared";
 import { css } from "styled-components";
 import { postRecord } from "../../../../../services/greenlab";
 import { AppContext } from "../../../../App/context";
-import { FormContext } from "../../../context";
 
 const Component: React.FunctionComponent<{}> = () => {
   const { urlSearchParams } = useQuery();
   const { appData } = useContext(AppContext);
   const { params } = useContext(CheckoutFormContext);
   const navigate = useNavigate();
+  const [paymentErrorMessage, setPaymentErrorMessage] = useState<string>();
+  const [paymentError, setPaymentError] = useState<boolean>(false);
   
   useEffect(() => {
     (async () => {
       const tbkToken = urlSearchParams.get('TBK_TOKEN') || '';
-      const tbkTxnId = urlSearchParams.get('TRANSACCION_ID') || '';
+      const urlParams = new URLSearchParams(window.location.search);
 
       // Get data from local and remove it
       let localData: any = window.localStorage.getItem(`tbk_${tbkToken}`);
       if(typeof localData === 'string') {
         localData = JSON.parse(localData);
-        window.localStorage.removeItem(`tbk_${tbkToken}`);
       }
 
-      const response = await confirm({ token: tbkToken, transactionId: tbkTxnId });
+      const response = await confirm({ token: tbkToken });
+
+      if(response.error) {
+        setPaymentError(true);
+        setPaymentErrorMessage(response.message);
+        if(response.data.donationRef) {
+          console.log(response.data.donationRef)
+          urlParams.set('donation', response.data.donationRef);
+        }
+      } else {
+        window.localStorage.removeItem(`tbk_${tbkToken}`);
+
+        if(urlParams.get('TRANSACCION_ID')) {
+          urlParams.delete('TRANSACCION_ID');
+        }
+      }
       
       const today = new Date();
       const tomorrow = new Date(today);
@@ -78,30 +93,19 @@ const Component: React.FunctionComponent<{}> = () => {
             txnStatus: response.status === 400 ? 'pending' : 'done',
             txnType: "transbank",
             tbkToken,
-            tbkTxnId,
           },
           appData?.settings?.services?.forma?.form_id,
         );
       }
 
       const timer = setTimeout(() => {
-        const urlParams = new URLSearchParams(window.location.search) // Ej. // TBK_TOKEN=01ab47587b3d872a19823c8aa685a777978f5b57094d78ce32a164400ae6ee44&TRANSACCION_ID=276
-
-        if(urlParams.get('TBK_TOKEN')) {
-          urlParams.delete('TBK_TOKEN');
-        }
-
-        if(urlParams.get('TRANSACCION_ID')) {
-          urlParams.delete('TRANSACCION_ID');
-        }
-
         navigate({
-          pathname: generatePath(`/:couponType/forms/thank-you`, {
+          pathname: generatePath(response.error ? `/:couponType/forms/registration` : '/:couponType/forms/thank-you', {
             couponType: `${params.couponType}`,
           }),
           search: urlParams.toString(),
-        }, { replace: true });
-      }, 1000);
+        }, { replace: true});
+      }, response.error ? 5000 : 1000);
 
       return () => {
         clearTimeout(timer);
@@ -120,14 +124,27 @@ const Component: React.FunctionComponent<{}> = () => {
       `}
     >
       <Elements.Img src={`${process.env.PUBLIC_URL + '/images/transbank-webpay.png'}`} width='300px' height='auto' />
-      <Elements.Span
-        customCss={css`
-          margin: ${pixelToRem(60)} 0;
-          text-align: center;
-        `}
-      >Confirmando el pago, aguarde un momento<Loader/></Elements.Span>
+      {paymentError ? (
+        <Elements.Span
+          customCss={css`
+            margin: ${pixelToRem(60)} 0;
+            text-align: center;
+            color: ${({theme}) => theme.color.error.normal};
+          `}
+        >{paymentErrorMessage}.<br/>Por favor intente nuevamente.</Elements.Span>
+      ) : (
+        <Elements.Span
+          customCss={css`
+            margin: ${pixelToRem(60)} 0;
+            text-align: center;
+          `}
+        >Confirmando el pago, aguarde un momento<Loader/></Elements.Span>
+      )}
     </Elements.Wrapper>
-  ), []);
+  ), [
+    paymentError,
+    paymentErrorMessage,
+  ]);
 }
 
 Component.displayName = 'TransbankConfirmPayment';

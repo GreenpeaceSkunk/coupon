@@ -29,30 +29,34 @@ const Component: React.FunctionComponent<{}> = () => {
     (async () => {
       if(appData.features.payment_gateway.enabled && appData.features.payment_gateway.third_party) {
         const data = {
-          nombre: user.firstName,
-          apellido: user.lastName,
-          rut: user.docNumber,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          docType: 'RUT',
+          docNumber: user.docNumber,
           email: user.email,
-          prefijo: `${user.areaCode}`,
-          telefono: user.phoneNumber,
-          fechaNacimiento: moment(user.birthDate, 'DD/MM/YYYY').format('YYYY-MM-DD'),
-          pais: user.country,
+          areaCode: `${user.areaCode || 56}`,
+          phoneNumber: user.phoneNumber,
+          birthDate: moment(user.birthDate, 'DD/MM/YYYY').format('YYYY-MM-DD'),
+          country: `${user.country || 'chile'}`.toLowerCase(),
           region: user.region,
-          provincia: user.province,
-          comuna: user.city,
-          calle: user.address,
-          numero: user.addressNumber,
-          monto: payment.amount === 'otherAmount' ? payment.newAmount : payment.amount,
-          utmCampaign: urlSearchParams.get('utm_campaign') || 'undefined',
-          utmMedium: urlSearchParams.get('utm_medium') || 'undefined',
-          utmSource: urlSearchParams.get('utm_source') || 'undefined',
-          utmContent: urlSearchParams.get('utm_content') || 'undefined',
-          utmTerm: urlSearchParams.get('utm_term') || 'undefined',
-          tipoDonacion: params.couponType,
-          titular: Boolean((+payment.isCardHolder)),
-          tarjetaHabienteRut: payment.isCardHolder ? user.docNumber : payment.docNumber,
-          tarjetaHabienteNombre: payment.isCardHolder ? `${user.firstName} ${user.lastName}` : payment.cardHolderName,
-          response_url: window.location.origin + generatePath(`/coupon/:couponType/forms/checkout/transbank/confirm`, {
+          province: user.province,
+          city: user.city, // comuna
+          address: user.address,
+          addressNumber: user.addressNumber,
+          amount: payment.amount === 'otherAmount' ? payment.newAmount : payment.amount,
+          salesforcefCampaignId: appData.settings.tracking.salesforce.campaign_id,
+          utmCampaign: urlSearchParams.get('utm_campaign') || '',
+          utmMedium: urlSearchParams.get('utm_medium') || '',
+          utmSource: urlSearchParams.get('utm_source') || '',
+          utmContent: urlSearchParams.get('utm_content') || '',
+          utmTerm: urlSearchParams.get('utm_term') || '',
+          donationType: params.couponType,
+          paymentGatewayName: 'transbank',
+          paymentIsCardHolder: Boolean((+payment.isCardHolder)),
+          paymentDocType: 'RUT',
+          paymentDocNumber: payment.isCardHolder ? user.docNumber : payment.docNumber,
+          paymentHolderName: payment.isCardHolder ? `${user.firstName} ${user.lastName}` : payment.cardHolderName,
+          apiResponseUrl: window.location.origin + generatePath(`/coupon/:couponType/forms/checkout/transbank/confirm`, {
             couponType: params.couponType as CouponType,
           }),
           apiResponseUrlParams: searchParams || '',
@@ -61,7 +65,6 @@ const Component: React.FunctionComponent<{}> = () => {
         const response = await suscribe(data);
 
         if(response.token && response.url_webpay) {
-          // Save locally
           window.localStorage.setItem(`tbk_${response.token}`, JSON.stringify(data));
 
           setToken(response.token);
@@ -83,7 +86,7 @@ const Component: React.FunctionComponent<{}> = () => {
             }
           } 
         } else {
-          dispatch({type: 'SET_ERROR', error: response.data});
+          dispatch({type: 'SET_ERROR', error: response.message});
         }
       } else {
         navigate({
@@ -120,17 +123,14 @@ const Component: React.FunctionComponent<{}> = () => {
               text-align: center;
             `}
           >No se pudo generar el token<br/>Por favor revisa los siguientes errores:</Elements.Span>
-            {Object.keys(error).map((err: string, idx: number) =>
-              <Elements.Span
-                key={idx}
-                customCss={css`
-                  color: ${({theme}) => theme.color.error.normal};
-                  font-size: ${pixelToRem(14)};
-                  text-align: center;
-                  margin-bottom: ${pixelToRem(14)};
-                `}
-              >{err}</Elements.Span>
-            )}
+          <Elements.P
+            customCss={css`
+              color: ${({theme}) => theme.color.error.normal};
+              font-size: ${pixelToRem(14)};
+              text-align: center;
+              margin-bottom: ${pixelToRem(14)};
+            `}
+          >{typeof error === 'object' ? Object.keys(error).map((err: string, idx: number) => err) : error}</Elements.P>
           <Link to={generatePath(`/:couponType/forms/registration`, {
             couponType: params.couponType as CouponType,
           }) + searchParams}>Volver</Link>
