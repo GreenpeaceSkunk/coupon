@@ -1,11 +1,12 @@
 import { AxiosResquestError } from 'greenpeace';
 import { ApiCall } from '../utils/apiCall';
+import { getApiUrl } from '../utils';
 
 type TransbankSuscribeResponse = {token: string; url_webpay: string};
 
 export const suscribe = async (data: any): Promise<any | AxiosResquestError> => {
   const response: any = await ApiCall({
-    baseURL: `${process.env.REACT_APP_GREENPEACE_TRANSBANK_API_URL}/inscripcion`,
+    baseURL: `${getApiUrl()}/payment-gateway/transbank/create`,
     method: 'POST',
     data,
   });
@@ -13,8 +14,8 @@ export const suscribe = async (data: any): Promise<any | AxiosResquestError> => 
 
   if(response.error) {
     return {
-      message: response.data.messages[0],
-      data: response.data.validationErrors,
+      error: true,
+      message: response.message ? response.message : 'Undefined error',
       status: response.status,
     } as AxiosResquestError;
   }
@@ -25,21 +26,19 @@ export const suscribe = async (data: any): Promise<any | AxiosResquestError> => 
   } as TransbankSuscribeResponse;
 };
 
-export const confirm = async (data: {token: string, transactionId: string}): Promise<any | AxiosResquestError> => {
+export const confirm = async (data: {token: string}): Promise<any | AxiosResquestError> => {
   const response: any = await ApiCall({
-    baseURL: `${process.env.REACT_APP_GREENPEACE_TRANSBANK_API_URL}/inscripcion/confirmar`,
+    baseURL: `${getApiUrl()}/payment-gateway/transbank/confirm?token=${data.token}`,
     method: 'POST',
-    data: {
-      token: data.token,
-      transaccionId: data.transactionId,
-    },
+    data: {},
   });
 
   if(response.error) {
     return {
-      message: response.data,
+      message: response.data.errorMessage,
       status: response.status,
       error: response.error,
+      data: response.data.data,
     } as AxiosResquestError;
   }
 
